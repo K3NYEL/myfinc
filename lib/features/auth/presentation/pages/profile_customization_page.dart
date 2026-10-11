@@ -154,8 +154,6 @@ class _ProfileCustomizationPageState
                     const SizedBox(height: 5),
                     Text(_bioController.text.trim(), textAlign: TextAlign.center),
                   ],
-                  const SizedBox(height: 8),
-                  Text('ID: ${user.id}', style: theme.textTheme.bodySmall),
                 ],
               ),
             ),
