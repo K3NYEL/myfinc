@@ -116,8 +116,6 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         (match) => ',',
       );
 
-  String _currencyLabel(String code) => '$code · ${_currencies[code] ?? code}';
-
   Future<void> _selectCurrency({required bool from}) async {
     final selected = from ? _from : _to;
     final result = await showModalBottomSheet<String>(
