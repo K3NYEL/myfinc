@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../firebase_options.dart';
 import 'notification_permission_service.dart';
+import 'notification_inbox_service.dart';
 
 /// Must be top-level so Firebase can invoke it in a background isolate.
 @pragma('vm:entry-point')
@@ -64,13 +65,32 @@ class FcmService {
     }
   }
 
+  static String _messageTitle(RemoteMessage message) =>
+      message.notification?.title ??
+      message.data['title']?.toString() ??
+      'MyFinc';
+
+  static String _messageBody(RemoteMessage message) =>
+      message.notification?.body ??
+      message.data['body']?.toString() ??
+      'Tienes una nueva notificación.';
+
+  static void _storeMessage(RemoteMessage message) {
+    final id = message.messageId ??
+        'push:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
+    unawaited(NotificationInboxService.instance.add(
+      id: id,
+      title: _messageTitle(message),
+      message: _messageBody(message),
+      receivedAt: message.sentTime,
+      source: 'push',
+    ));
+  }
+
   static void _showForegroundMessage(RemoteMessage message) {
-    final title = message.notification?.title ??
-        message.data['title']?.toString() ??
-        'MyFinc';
-    final body = message.notification?.body ??
-        message.data['body']?.toString() ??
-        'Tienes una nueva notificación.';
+    _storeMessage(message);
+    final title = _messageTitle(message);
+    final body = _messageBody(message);
 
     scaffoldMessengerKey.currentState
       ?..hideCurrentSnackBar()
@@ -92,6 +112,7 @@ class FcmService {
   }
 
   static void _handleOpenedMessage(RemoteMessage message) {
+    _storeMessage(message);
     _openedMessages.add(message);
     _showForegroundMessage(message);
   }

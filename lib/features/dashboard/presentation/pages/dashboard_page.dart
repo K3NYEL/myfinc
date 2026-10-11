@@ -6,6 +6,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/updates/notifications_and_patches_dialog.dart';
 import '../../../../core/notifications/notification_permission_service.dart';
+import '../../../../core/notifications/notification_inbox_service.dart';
+import '../../../../core/updates/myfinc_updates_service.dart';
 import '../../../../core/settings/app_preferences.dart';
 import '../../../../shared/widgets/movement_tile.dart';
 import '../../../../shared/widgets/async_value_view.dart';
@@ -59,7 +61,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _askForNotificationPermissionIfNeeded();
+      _refreshPublishedNotices();
     });
+  }
+
+  Future<void> _refreshPublishedNotices() async {
+    final inbox = NotificationInboxService.instance;
+    await inbox.initialize();
+    try {
+      final manifest = await const MyFincUpdatesService().fetchManifest();
+      await inbox.syncPublishedNotices(manifest.notifications);
+    } catch (error) {
+      debugPrint('[MYFINC INBOX] No se pudieron sincronizar los avisos: $error');
+    }
   }
 
   Future<void> _askForNotificationPermissionIfNeeded() async {
@@ -129,13 +143,38 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ],
               ),
             ),
-            IconButton(
-              tooltip: 'Notificaciones y parches',
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (_) => const NotificationsAndPatchesDialog(),
+            AnimatedBuilder(
+              animation: NotificationInboxService.instance,
+              builder: (context, _) => Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    tooltip: 'Notificaciones y parches',
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => const NotificationsAndPatchesDialog(),
+                    ),
+                    icon: const Icon(Icons.notifications_active_outlined),
+                  ),
+                  if (NotificationInboxService.instance.hasPending)
+                    Positioned(
+                      top: 7,
+                      right: 7,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEF4444),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              icon: const Icon(Icons.notifications_active_outlined),
             ),
             IconButton(
               tooltip: 'Configuración',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../platform/update_service.dart';
 import 'myfinc_updates_service.dart';
+import '../notifications/notification_inbox_service.dart';
 import '../../shared/widgets/update_dialog.dart';
 
 class NotificationsAndPatchesDialog extends StatefulWidget {
@@ -19,13 +20,70 @@ class _NotificationsAndPatchesDialogState
   @override
   void initState() {
     super.initState();
-    _manifestFuture = const MyFincUpdatesService().fetchManifest();
+    _manifestFuture = _loadManifest();
+  }
+
+  Future<MyFincUpdatesManifest> _loadManifest() async {
+    final inbox = NotificationInboxService.instance;
+    await inbox.initialize();
+    final manifest = await const MyFincUpdatesService().fetchManifest();
+    await inbox.syncPublishedNotices(manifest.notifications);
+    return manifest;
   }
 
   void _retry() {
     setState(() {
-      _manifestFuture = const MyFincUpdatesService().fetchManifest();
+      _manifestFuture = _loadManifest();
     });
+  }
+
+  Future<void> _dismissNotification(String id) async {
+    await NotificationInboxService.instance.dismiss(id);
+    if (mounted) setState(() {});
+  }
+
+  Widget _notificationList(BuildContext context) {
+    final items = NotificationInboxService.instance.items;
+    if (items.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 16),
+        child: Text('No hay notificaciones pendientes.'),
+      );
+    }
+    return Column(
+      children: [
+        for (final item in items)
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+              leading: Icon(
+                item.level == 'critical'
+                    ? Icons.error_outline_rounded
+                    : item.level == 'warning'
+                        ? Icons.warning_amber_rounded
+                        : item.source == 'push'
+                            ? Icons.notifications_active_outlined
+                            : Icons.campaign_outlined,
+                color: item.level == 'critical'
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+              ),
+              title: Text(item.title),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text('${item.message}\\n${_dateLabel(item.receivedAt)}'),
+              ),
+              trailing: IconButton(
+                tooltip: 'Eliminar notificación',
+                onPressed: () => _dismissNotification(item.id),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+              isThreeLine: true,
+            ),
+          ),
+      ],
+    );
   }
 
   Future<void> _checkAndOpenPatch() async {
@@ -83,20 +141,24 @@ class _NotificationsAndPatchesDialogState
               );
             }
             if (snapshot.hasError || !snapshot.hasData) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'No se pudieron cargar los avisos. Comprueba tu conexión e inténtalo de nuevo.',
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _retry,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Volver a intentar'),
-                  ),
-                ],
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'No se pudieron cargar los avisos del servidor. Las notificaciones guardadas siguen disponibles.',
+                    ),
+                    const SizedBox(height: 12),
+                    _notificationList(context),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _retry,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Volver a intentar'),
+                    ),
+                  ],
+                ),
               );
             }
 
@@ -113,36 +175,7 @@ class _NotificationsAndPatchesDialogState
                         ),
                   ),
                   const SizedBox(height: 8),
-                  if (manifest.notifications.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 16),
-                      child: Text('No hay avisos nuevos.'),
-                    )
-                  else
-                    for (final notice in manifest.notifications)
-                      Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(12),
-                          leading: Icon(
-                            notice.level == 'critical'
-                                ? Icons.error_outline_rounded
-                                : notice.level == 'warning'
-                                    ? Icons.warning_amber_rounded
-                                    : Icons.notifications_none_rounded,
-                            color: notice.level == 'critical'
-                                ? Theme.of(context).colorScheme.error
-                                : Theme.of(context).colorScheme.primary,
-                          ),
-                          title: Text(notice.title),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              '${notice.message}\n${_dateLabel(notice.publishedAt)}',
-                            ),
-                          ),
-                        ),
-                      ),
+                  _notificationList(context),
                   const SizedBox(height: 12),
                   Text(
                     'Parches y correcciones',

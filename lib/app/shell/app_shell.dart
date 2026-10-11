@@ -41,15 +41,23 @@ class AppShell extends StatelessWidget {
     final selectedIndex = _tabs.indexOf(path).clamp(0, _tabs.length - 1);
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
     return Scaffold(
-      body: SafeArea(
-        child: Row(
+      body: ColoredBox(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: SafeArea(
+          child: Row(
           children: [
             if (isDesktop) _desktopNavigation(context, selectedIndex),
             // GoRouter owns the page subtree and its GlobalKey. Keeping the
             // previous route alive in AnimatedSwitcher can duplicate that key
             // when the next ShellRoute child is mounted.
-            Expanded(child: child),
+            Expanded(
+              child: ColoredBox(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: child,
+              ),
+            ),
           ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
