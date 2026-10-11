@@ -35,6 +35,9 @@ Future<void> main() async {
 
   runApp(const ProviderScope(child: MyFincApp()));
 
+  // Refresh rates after first paint; cached rates keep the app usable offline.
+  refreshDisplayExchangeRates();
+
   // Start listeners after the app is mounted so notification taps can be shown.
   if (firebaseInitialized) {
     try {
