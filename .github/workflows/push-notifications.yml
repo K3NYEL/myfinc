@@ -118,7 +118,7 @@ jobs:
 
               if (process.env.SEND_UPDATE === 'true') {
                 const version = String(process.env.RELEASE_VERSION || '').trim();
-                if (!/^v?\\d+\\.\\d+\\.\\d+$/.test(version)) {
+                if (!/^v?\d+\.\d+\.\d+$/.test(version)) {
                   throw new Error('Enter a valid version, for example 0.1.5.');
                 }
                 const normalizedVersion = version.startsWith('v') ? version : `v${version}`;
