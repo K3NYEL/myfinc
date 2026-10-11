@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-11T15:30:00Z",
+  "updatedAt": "2026-10-11T18:44:33.442Z",
   "notifications": [
     {
-      "id": "myfinc-0.1.1-responsive-dialog",
-      "title": "Mejoras para el centro de notificaciones",
-      "message": "Estamos preparando MyFinc 0.1.1 con un ajuste del centro de notificaciones para pantallas pequeñas. El diálogo tendrá ancho adaptable, altura limitada y contenido desplazable para facilitar la lectura en móviles. La actualización estará disponible cuando termine correctamente las comprobaciones de compilación, pruebas y firma.",
-      "publishedAt": "2026-10-11T15:30:00Z",
-      "level": "info"
+      "id": "aviso-11-octubre-2026",
+      "title": "Prueba 1 del Sistema de notificaciones",
+      "message": "Este es una notificacion de prueba",
+      "level": "info",
+      "publishedAt": "2026-10-11T18:44:32.573Z"
     }
   ],
   "patches": []
