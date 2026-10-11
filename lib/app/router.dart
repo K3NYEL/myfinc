@@ -21,7 +21,7 @@ import 'router_refresh_notifier.dart';
 import 'settings_provider.dart';
 import 'shell/app_shell.dart';
 
-const _pageDuration = Duration(milliseconds: 320);
+const _pageDuration = Duration(milliseconds: 260);
 const _minimumSplashDuration = Duration(milliseconds: 900);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -67,45 +67,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const DashboardPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const DashboardPage()),
           ),
           GoRoute(
             path: '/statistics',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const StatisticsPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const StatisticsPage()),
           ),
           GoRoute(
             path: '/transactions',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const TransactionsPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const TransactionsPage()),
           ),
           GoRoute(
             path: '/accounts',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const AccountsPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const AccountsPage()),
           ),
           GoRoute(
             path: '/settings',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const SettingsPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const SettingsPage()),
           ),
           GoRoute(
             path: '/settings/cloud-account',
-            pageBuilder: (_, state) => NoTransitionPage<void>(
-              key: state.pageKey,
-              child: const CloudAccountPage(),
-            ),
+            pageBuilder: (_, state) => _page(state, const CloudAccountPage()),
           ),
         ],
       ),
@@ -128,7 +110,12 @@ CustomTransitionPage<void> _page(
 ) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
-    child: child,
+    child: Builder(
+      builder: (context) => ColoredBox(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: child,
+      ),
+    ),
     transitionDuration: _pageDuration,
     reverseTransitionDuration: _pageDuration,
     transitionsBuilder: (context, animation, __, child) {
