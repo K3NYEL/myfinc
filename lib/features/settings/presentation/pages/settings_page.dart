@@ -13,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../features/auth/presentation/session_provider.dart';
 import '../../../../app/settings_provider.dart';
 import '../../../../core/platform/update_service.dart';
-import '../../../../core/updates/notifications_and_patches_dialog.dart';
 import '../../../../core/notifications/notification_permission_service.dart';
 import '../../../../core/database/database.dart';
 import '../../../../core/database/backup_service.dart';
@@ -1028,7 +1027,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Configuración',
+                      settings.languageCode == 'en' ? 'Settings' : 'Configuración',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1046,23 +1045,49 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // APARIENCIA
         // =========================
         _SettingsSection(
-          title: 'Apariencia',
+          title: settings.languageCode == 'en' ? 'Appearance' : 'Apariencia',
           children: [
             _SettingsTile(
               icon: Icons.palette_outlined,
-              title: 'Tema',
-              subtitle: _themeLabel(settings.theme),
+              title: settings.languageCode == 'en' ? 'Theme' : 'Tema',
+              subtitle: _themeLabel(settings.theme, settings.languageCode),
               onTap: () => _showThemeSelector(context, ref),
             ),
             _SettingsTile(
               icon: Icons.animation_outlined,
-              title: 'Animaciones',
+              title: settings.languageCode == 'en' ? 'Animations' : 'Animaciones',
               subtitle:
-                  settings.animationsEnabled ? 'Activadas' : 'Desactivadas',
+                  settings.languageCode == 'en'
+                      ? (settings.animationsEnabled ? 'Enabled' : 'Disabled')
+                      : (settings.animationsEnabled ? 'Activadas' : 'Desactivadas'),
               trailing: Switch(
                 value: settings.animationsEnabled,
                 onChanged: (value) {
                   ref.read(settingsProvider.notifier).setAnimations(value);
+                },
+              ),
+            ),
+          ],
+        ),
+
+        _SettingsSection(
+          title: settings.languageCode == 'en' ? 'Language' : 'Idioma',
+          children: [
+            _SettingsTile(
+              icon: Icons.language_rounded,
+              title: settings.languageCode == 'en' ? 'App language' : 'Idioma de la aplicación',
+              subtitle: settings.languageCode == 'en' ? 'English' : 'Español',
+              trailing: DropdownButton<String>(
+                value: settings.languageCode,
+                underline: const SizedBox.shrink(),
+                items: const [
+                  DropdownMenuItem(value: 'es', child: Text('Español')),
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(settingsProvider.notifier).setLanguage(value);
+                  }
                 },
               ),
             ),
@@ -1191,15 +1216,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         _SettingsSection(
           title: 'Actualizaciones',
           children: [
-            _SettingsTile(
-              icon: Icons.notifications_active_outlined,
-              title: 'Notificaciones y parches',
-              subtitle: 'Consultar avisos, correcciones y notas de versión',
-              onTap: () => showDialog<void>(
-                context: context,
-                builder: (_) => const NotificationsAndPatchesDialog(),
-              ),
-            ),
             _SettingsTile(
               icon: Icons.notifications_outlined,
               title: 'Permisos de notificación',
@@ -1362,14 +1378,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  String _themeLabel(ThemePreference theme) {
+  String _themeLabel(ThemePreference theme, String languageCode) {
     switch (theme) {
       case ThemePreference.system:
-        return 'Usar configuración del sistema';
+        return languageCode == 'en' ? 'System default' : 'Usar configuración del sistema';
       case ThemePreference.light:
-        return 'Tema claro';
+        return languageCode == 'en' ? 'Light theme' : 'Tema claro';
       case ThemePreference.dark:
-        return 'Tema oscuro';
+        return languageCode == 'en' ? 'Dark theme' : 'Tema oscuro';
     }
   }
 
