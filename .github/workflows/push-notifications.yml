@@ -50,7 +50,8 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const { execFileSync } = require('node:child_process');
-          const admin = require('firebase-admin');
+          const { initializeApp, cert } = require('firebase-admin/app');
+          const { getMessaging } = require('firebase-admin/messaging');
 
           async function main() {
             const isManual = process.env.EVENT_NAME === 'workflow_dispatch';
@@ -66,8 +67,8 @@ jobs:
               throw new Error('The service account project_id does not match myfinc-4b36e.');
             }
 
-            admin.initializeApp({
-              credential: admin.credential.cert(credentials),
+            initializeApp({
+              credential: cert(credentials),
               projectId: process.env.FIREBASE_PROJECT_ID,
             });
 
@@ -76,7 +77,7 @@ jobs:
                 console.log('FCM credentials are valid. No test message requested; existing notices were not resent.');
                 return;
               }
-              const messageId = await admin.messaging().send({
+              const messageId = await getMessaging().send({
                 topic: 'myfinc_announcements',
                 notification: {
                   title: 'MyFinc · Prueba de notificaciones',
@@ -147,7 +148,7 @@ jobs:
                 continue;
               }
 
-              const messageId = await admin.messaging().send({
+              const messageId = await getMessaging().send({
                 topic: 'myfinc_announcements',
                 notification: { title, body },
                 data: {
