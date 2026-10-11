@@ -33,16 +33,20 @@ class _State extends ConsumerState<TransactionFormPage> {
     final amount = parseAmount(_amount.text) ?? 0;
     String? error;
     try {
-      if (_acc == null) throw const AppException('Elige una cuenta.');
+      final availableAccounts = ref.read(accountsProvider).value ?? [];
+      final accountId = _acc ?? (availableAccounts.isNotEmpty ? availableAccounts.first.id : null);
+      if (accountId == null) {
+        throw const AppException('No hay una cuenta disponible. Crea o restaura tu cuenta e inténtalo de nuevo.');
+      }
       if (amount <= 0) {
         throw const AppException('Escribe un monto válido mayor que cero.');
       }
       if (_isTransfer) {
         if (_dest == null) throw const AppException('Elige la cuenta destino.');
-        await repo.addTransfer(_acc!, _dest!, amount, _desc.text);
+        await repo.addTransfer(accountId, _dest!, amount, _desc.text);
       } else {
         await repo.addTransaction(
-          accountId: _acc!,
+          accountId: accountId,
           categoryId: _cat,
           type: widget.kind,
           amount: amount,
@@ -111,6 +115,8 @@ class _State extends ConsumerState<TransactionFormPage> {
       for (final account in accounts)
         DropdownMenuItem(value: account.id, child: Text(account.name)),
     ];
+    final selectedAccountId = _acc ?? (accounts.isNotEmpty ? accounts.first.id : null);
+    final selectedCategoryId = _cat ?? (categories.isNotEmpty ? categories.first.id : null);
 
     return Scaffold(
       appBar: AppBar(title: Text(_title)),
@@ -126,7 +132,7 @@ class _State extends ConsumerState<TransactionFormPage> {
           const SizedBox(height: 12),
           _drop(
             _isTransfer ? 'Cuenta origen' : 'Cuenta',
-            _acc,
+            selectedAccountId,
             accountItems,
             (value) => setState(() => _acc = value),
           ),
@@ -140,7 +146,7 @@ class _State extends ConsumerState<TransactionFormPage> {
           if (!_isTransfer)
             _drop(
               'Categoría',
-              _cat,
+              selectedCategoryId,
               [
                 for (final category in categories)
                   DropdownMenuItem(
