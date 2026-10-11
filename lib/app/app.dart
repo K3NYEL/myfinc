@@ -55,6 +55,8 @@ class _MyFincAppState extends ConsumerState<MyFincApp>
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: settings.themeMode,
+      locale: Locale(settings.languageCode),
+      supportedLocales: const [Locale('es'), Locale('en')],
       routerConfig: ref.watch(appRouterProvider),
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
