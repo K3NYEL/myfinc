@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/settings/app_preferences.dart';
+import '../../../../core/utils/currency_utils.dart';
+
 /// Conversor informativo. Nunca modifica saldos ni transacciones guardados.
 class CurrencyConverterPage extends StatefulWidget {
   const CurrencyConverterPage({super.key});
@@ -42,11 +45,13 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
   DateTime? _updatedAt;
   bool _loading = false;
   String? _error;
+  String _displayCurrency = 'DOP';
 
   @override
   void initState() {
     super.initState();
     _loadRates();
+    _loadDisplayCurrency();
   }
 
   @override
@@ -68,6 +73,25 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     final rate = _rate;
     if (rate == null) return null;
     return _amount * rate;
+  }
+
+  Future<void> _loadDisplayCurrency() async {
+    final currency = await AppPreferences.getCurrency();
+    if (!mounted) return;
+    setState(() => _displayCurrency = currency);
+  }
+
+  Future<void> _setDisplayCurrency(String code) async {
+    if (code == _displayCurrency) return;
+    await AppPreferences.setCurrency(code);
+    if (!mounted) return;
+    setState(() => _displayCurrency = code);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Moneda de visualización cambiada a ${currencyLabel(code)}'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _loadRates() async {
@@ -282,6 +306,69 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                         ],
                       ),
                     ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.tune_rounded, color: scheme.primary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Moneda de visualización',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Elige cómo se muestran los importes de MyFinc. Esto no convierte ni modifica los saldos y movimientos guardados.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment<String>(
+                        value: 'DOP',
+                        label: Text('DOP'),
+                        icon: Icon(Icons.south_america_rounded),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'USD',
+                        label: Text('USD'),
+                        icon: Icon(Icons.attach_money_rounded),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'EUR',
+                        label: Text('EUR'),
+                        icon: Icon(Icons.euro_rounded),
+                      ),
+                    ],
+                    selected: {_displayCurrency},
+                    onSelectionChanged: (values) =>
+                        _setDisplayCurrency(values.first),
+                    showSelectedIcon: false,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    currencyLabel(_displayCurrency),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
