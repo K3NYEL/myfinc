@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-11T18:48:32.301Z",
+  "updatedAt": "2026-10-11T20:22:56.245Z",
   "notifications": [
     {
-      "id": "aviso-octubre-2026",
-      "title": "Prueba",
-      "message": "Aviso de Prueba",
-      "level": "warning",
-      "publishedAt": "2026-10-11T18:48:31.828Z"
+      "id": "aviso-11-octubre-2026",
+      "title": "Actualizacion programada",
+      "message": "Es estara lanzando la v0.1.2 de MyFinc",
+      "level": "info",
+      "publishedAt": "2026-10-11T20:22:55.544Z"
     }
   ],
   "patches": []
