@@ -127,7 +127,7 @@ jobs:
                 },
                 android: {
                   priority: 'high',
-                  notification: { channelId: 'myfinc_announcements' },
+                  notification: { channelId: 'myfinc_general' },
                 },
               });
               console.log(`Sent notice ${notice.id}; FCM message id: ${messageId}`);
