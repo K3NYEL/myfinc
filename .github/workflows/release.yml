@@ -287,8 +287,19 @@ jobs:
             build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_x86_64.apk
             build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_SHA256SUMS.txt
 
+      - name: Check Firebase notification configuration
+        id: firebase_config
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Authenticate to Firebase for release notification
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        if: ${{ steps.firebase_config.outputs.configured == 'true' }}
         id: firebase_auth
         uses: google-github-actions/auth@v2
         with:
@@ -342,7 +353,7 @@ jobs:
             "https://fcm.googleapis.com/v1/projects/$PROJECT_ID/messages:send"
 
       - name: Explain skipped notification setup
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON == '' }}
+        if: ${{ steps.firebase_config.outputs.configured != 'true' }}
         run: |
           echo "::warning::Release published, but push notification was skipped because FIREBASE_SERVICE_ACCOUNT_JSON is not configured."
 
