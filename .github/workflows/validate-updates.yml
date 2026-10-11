@@ -1,0 +1,37 @@
+name: MyFinc Notifications Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/updates/manifest.json"
+      - ".github/scripts/validate_updates.py"
+      - ".github/workflows/validate-updates.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/updates/manifest.json"
+      - ".github/scripts/validate_updates.py"
+      - ".github/workflows/validate-updates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-manifest:
+    name: Validate notifications and patches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate JSON manifest
+        run: python3 .github/scripts/validate_updates.py
