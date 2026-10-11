@@ -287,6 +287,65 @@ jobs:
             build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_x86_64.apk
             build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_SHA256SUMS.txt
 
+      - name: Authenticate to Firebase for release notification
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        id: firebase_auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          token_format: access_token
+
+      - name: Notify MyFinc installations about the new release
+        if: ${{ steps.firebase_auth.outcome == 'success' }}
+        env:
+          ACCESS_TOKEN: ${{ steps.firebase_auth.outputs.access_token }}
+          PROJECT_ID: myfinc-4b36e
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.release_tag || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="Nueva actualización de MyFinc v${RELEASE_VERSION}"
+          BODY="Ya está disponible MyFinc v${RELEASE_VERSION}. Abre la app para consultar los cambios y comprobar la actualización."
+
+          jq -n \
+            --arg title "$TITLE" \
+            --arg body "$BODY" \
+            --arg tag "$RELEASE_TAG" \
+            --arg url "$RELEASE_URL" \
+            '{
+              message: {
+                topic: "myfinc_announcements",
+                notification: {title: $title, body: $body},
+                data: {
+                  id: ("release:" + $tag),
+                  title: $title,
+                  body: $body,
+                  level: "info",
+                  source: "release",
+                  tag: $tag,
+                  url: $url
+                },
+                android: {
+                  priority: "high",
+                  notification: {channel_id: "myfinc_general_v2"}
+                }
+              }
+            }' > /tmp/myfinc-fcm-message.json
+
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "Content-Type: application/json; charset=UTF-8" \
+            --data-binary @/tmp/myfinc-fcm-message.json \
+            "https://fcm.googleapis.com/v1/projects/$PROJECT_ID/messages:send"
+
+      - name: Explain skipped notification setup
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON == '' }}
+        run: |
+          echo "::warning::Release published, but push notification was skipped because FIREBASE_SERVICE_ACCOUNT_JSON is not configured."
+
       - name: Clean signing files
         if: always()
         run: |
