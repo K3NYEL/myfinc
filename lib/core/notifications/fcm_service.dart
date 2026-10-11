@@ -14,6 +14,20 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final title = message.notification?.title ??
+      message.data['title']?.toString() ??
+      'MyFinc';
+  final body = message.notification?.body ??
+      message.data['body']?.toString() ??
+      'Tienes una nueva notificación.';
+  await NotificationInboxService.instance.add(
+    id: message.messageId ??
+        'push:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}',
+    title: title,
+    message: body,
+    receivedAt: message.sentTime,
+    source: 'push',
+  );
 }
 
 class FcmService {
