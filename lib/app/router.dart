@@ -7,6 +7,7 @@ import '../core/database/database.dart';
 import '../core/platform/update_service.dart';
 import '../features/accounts/presentation/pages/accounts_page.dart';
 import '../features/auth/presentation/pages/auth_page.dart';
+import '../features/auth/presentation/pages/profile_customization_page.dart';
 import '../features/auth/presentation/session_provider.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/finance/presentation/pages/transaction_form_page.dart';
@@ -88,6 +89,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/settings/cloud-account',
             pageBuilder: (_, state) => _page(state, const CloudAccountPage()),
+          ),
+          GoRoute(
+            path: '/settings/profile',
+            pageBuilder: (_, state) =>
+                _page(state, const ProfileCustomizationPage()),
           ),
         ],
       ),
