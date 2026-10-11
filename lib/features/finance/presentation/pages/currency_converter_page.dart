@@ -92,7 +92,13 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
       if (!mounted) return;
       setState(() {
         _rates = rates;
-        _updatedAt = DateTime.tryParse(decoded['time_last_update_utc']?.toString() ?? '')?.toLocal();
+        final updateUnix = decoded['time_last_update_unix'];
+        _updatedAt = updateUnix is num
+            ? DateTime.fromMillisecondsSinceEpoch(
+                updateUnix.toInt() * 1000,
+                isUtc: true,
+              ).toLocal()
+            : null;
       });
     } catch (_) {
       if (mounted) {
