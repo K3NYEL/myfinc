@@ -22,6 +22,7 @@ import '../../../../core/network/providers.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/database/migrations/legacy_data_migration_service.dart';
 import '../../../finance/presentation/providers.dart';
+import '../../../finance/presentation/pages/currency_converter_page.dart';
 import '../../../../core/settings/app_preferences.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/update_dialog.dart';
@@ -258,7 +259,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             const ListTile(
               title: Text('Moneda de visualización'),
-              subtitle: Text('Cambia el símbolo; no convierte los importes.'),
+              subtitle: Text('Cambia el formato del importe. Para tasas reales, usa el conversor.'),
             ),
             RadioGroup<String>(
               groupValue: _currencyCode,
@@ -1129,9 +1130,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             _SettingsTile(
               icon: Icons.attach_money_rounded,
-              title: 'Moneda',
+              title: 'Moneda de visualización',
               subtitle: currencyLabel(_currencyCode),
               onTap: _showCurrencySelector,
+            ),
+            _SettingsTile(
+              icon: Icons.currency_exchange_rounded,
+              title: 'Conversor de monedas',
+              subtitle: 'Consulta tasas de cambio y convierte entre más de 20 monedas',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const CurrencyConverterPage(),
+                ),
+              ),
             ),
             _SettingsTile(
               icon: Icons.category_outlined,
