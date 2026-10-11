@@ -55,10 +55,24 @@ jobs:
             exit 1
           fi
 
-          # Build the exact commit referenced by the selected release tag, including
-          # workflow_dispatch runs started from a branch other than the tag.
-          git checkout --detach "$TAG_SHA"
-          echo "Building release tag $RELEASE_TAG at commit $TAG_SHA"
+          TAG_VERSION="${RELEASE_TAG#v}"
+          TAG_COMMIT_VERSION="$(git show "$TAG_SHA:pubspec.yaml" | sed -nE 's/^version:[[:space:]]*([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/p')"
+          MAIN_VERSION="$(git show origin/main:pubspec.yaml | sed -nE 's/^version:[[:space:]]*([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/p')"
+
+          # A release tag may predate a version correction. Use main only when its
+          # pubspec version exactly matches the selected tag; otherwise fail closed.
+          if [ "$TAG_COMMIT_VERSION" = "$TAG_VERSION" ]; then
+            BUILD_SHA="$TAG_SHA"
+          elif [ "$MAIN_VERSION" = "$TAG_VERSION" ]; then
+            BUILD_SHA="$(git rev-parse origin/main)"
+            echo "Tag commit version is $TAG_COMMIT_VERSION; using matching main version at $BUILD_SHA."
+          else
+            echo "ERROR: Neither the tag commit nor main has pubspec version $TAG_VERSION."
+            exit 1
+          fi
+
+          git checkout --detach "$BUILD_SHA"
+          echo "Building release tag $RELEASE_TAG using commit $BUILD_SHA"
 
       - name: Setup Java
         uses: actions/setup-java@v4
