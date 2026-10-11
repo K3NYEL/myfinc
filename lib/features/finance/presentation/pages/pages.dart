@@ -584,8 +584,15 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      await context.push('/settings/profile');
+                      final saved = await context.push<bool>('/settings/profile');
                       await _loadProfile();
+                      if (saved == true && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Personalización guardada y aplicada al perfil.'),
+                          ),
+                        );
+                      }
                     },
                     icon: const Icon(Icons.manage_accounts_outlined),
                     label: const Text('Personalizar perfil'),
