@@ -21,17 +21,21 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       message.data['body']?.toString() ??
       'Tienes una nueva notificación.';
   await NotificationInboxService.instance.add(
-    id: message.messageId ??
+    id: message.data['id']?.toString() ??
+        message.messageId ??
         'push:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}',
     title: title,
     message: body,
     receivedAt: message.sentTime,
-    source: 'push',
+    level: message.data['level']?.toString() ?? 'info',
+    source: message.data['source']?.toString() ?? 'push',
   );
 }
 
 class FcmService {
   FcmService._();
+
+  static const String _announcementsTopic = 'myfinc_announcements';
 
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -58,15 +62,21 @@ class FcmService {
     final messaging = FirebaseMessaging.instance;
     try {
       // Broadcast announcements published from the MyFinc admin panel.
-      await messaging.subscribeToTopic('myfinc_announcements');
+      await messaging.subscribeToTopic(_announcementsTopic);
       _token = await messaging.getToken();
     } catch (error) {
       // Token retrieval can fail temporarily; keep message listeners active.
       debugPrint('MyFinc could not retrieve the FCM token: $error');
     }
 
-    _tokenRefreshSubscription ??= messaging.onTokenRefresh.listen((token) {
+    _tokenRefreshSubscription ??= messaging.onTokenRefresh.listen((token) async {
       _token = token;
+      // Reapply the broadcast subscription when Firebase rotates the token.
+      try {
+        await messaging.subscribeToTopic(_announcementsTopic);
+      } catch (error) {
+        debugPrint('MyFinc could not refresh its FCM topic subscription: $error');
+      }
     });
 
     _foregroundSubscription ??=
@@ -92,14 +102,16 @@ class FcmService {
       'Tienes una nueva notificación.';
 
   static void _storeMessage(RemoteMessage message) {
-    final id = message.messageId ??
+    final id = message.data['id']?.toString() ??
+        message.messageId ??
         'push:${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
     unawaited(NotificationInboxService.instance.add(
       id: id,
       title: _messageTitle(message),
       message: _messageBody(message),
       receivedAt: message.sentTime,
-      source: 'push',
+      level: message.data['level']?.toString() ?? 'info',
+      source: message.data['source']?.toString() ?? 'push',
     ));
   }
 
