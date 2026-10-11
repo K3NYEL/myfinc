@@ -9,7 +9,7 @@ class AppShell extends ConsumerWidget {
 
   static const _tabs = ['/', '/statistics', '/transactions', '/accounts'];
 
-  void _add(BuildContext context) => showModalBottomSheet(
+  void _add(BuildContext context, bool isEnglish) => showModalBottomSheet(
         context: context,
         builder: (_) => SafeArea(
           child: Column(
@@ -17,12 +17,12 @@ class AppShell extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(GoRouterState.of(context).uri.queryParameters['lang'] == 'en' ? 'What would you like to add?' : '¿Qué quieres registrar?'),
+                child: Text(isEnglish ? 'What would you like to add?' : '¿Qué quieres registrar?'),
               ),
               for (final (kind, label, icon) in [
-                ('income', 'Ingreso', Icons.arrow_upward),
-                ('expense', 'Gasto', Icons.arrow_downward),
-                ('transfer', 'Transferir', Icons.swap_horiz),
+                ('income', isEnglish ? 'Income' : 'Ingreso', Icons.arrow_upward),
+                ('expense', isEnglish ? 'Expense' : 'Gasto', Icons.arrow_downward),
+                ('transfer', isEnglish ? 'Transfer' : 'Transferir', Icons.swap_horiz),
               ])
                 ListTile(
                   leading: Icon(icon),
@@ -64,7 +64,7 @@ class AppShell extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _add(context),
+        onPressed: () => _add(context, isEnglish),
         tooltip: isEnglish ? 'Add transaction' : 'Agregar movimiento',
         child: const Icon(Icons.add),
       ),
