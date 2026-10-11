@@ -19,18 +19,28 @@ Future<void> main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
+  var firebaseInitialized = false;
   // Firebase options are currently configured for Android only.
   if (Platform.isAndroid) {
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      await FcmService.initialize();
+      firebaseInitialized = true;
     } catch (error) {
       // Push notifications must not prevent the offline-first app from opening.
-      debugPrint('MyFinc FCM initialization failed: $error');
+      debugPrint('MyFinc Firebase initialization failed: $error');
     }
   }
 
   runApp(const ProviderScope(child: MyFincApp()));
+
+  // Start listeners after the app is mounted so notification taps can be shown.
+  if (firebaseInitialized) {
+    try {
+      await FcmService.initialize();
+    } catch (error) {
+      debugPrint('MyFinc FCM initialization failed: $error');
+    }
+  }
 }
