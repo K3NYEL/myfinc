@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-11T20:22:56.245Z",
+  "updatedAt": "2026-10-11T21:18:04.744Z",
   "notifications": [
     {
       "id": "aviso-11-octubre-2026",
       "title": "Actualizacion programada",
-      "message": "Es estara lanzando la v0.1.2 de MyFinc",
+      "message": "Es estara lanzando la v0.1.4 de MyFinc",
       "level": "info",
       "publishedAt": "2026-10-11T20:22:55.544Z"
     }
