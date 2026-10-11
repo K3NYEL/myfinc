@@ -92,7 +92,7 @@ jobs:
                 },
                 android: {
                   priority: 'high',
-                  notification: { channelId: 'myfinc_general' },
+                  notification: { channelId: 'myfinc_general_v2' },
                 },
               });
               console.log(`Test notification sent to myfinc_announcements; FCM message id: ${messageId}`);
@@ -160,7 +160,7 @@ jobs:
                 },
                 android: {
                   priority: 'high',
-                  notification: { channelId: 'myfinc_general' },
+                  notification: { channelId: 'myfinc_general_v2' },
                 },
               });
               console.log(`Sent notice ${notice.id}; FCM message id: ${messageId}`);
