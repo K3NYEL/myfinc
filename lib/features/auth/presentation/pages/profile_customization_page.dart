@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../auth/presentation/session_provider.dart';
+import '../session_provider.dart';
 
 class ProfileCustomizationPage extends ConsumerStatefulWidget {
   const ProfileCustomizationPage({super.key});
@@ -62,8 +62,8 @@ class _ProfileCustomizationPageState
     _displayNameController.text =
         prefs.getString(_key('display_name')) ?? user.fullName;
     _bioController.text = prefs.getString(_key('bio')) ?? '';
-    _selectedColor = (prefs.getInt(_key('color')) ?? 0).clamp(0, _colors.length - 1);
-    _selectedAvatar = (prefs.getInt(_key('avatar')) ?? 0).clamp(0, _avatars.length - 1);
+    _selectedColor = (prefs.getInt(_key('color')) ?? 0).clamp(0, _colors.length - 1).toInt();
+    _selectedAvatar = (prefs.getInt(_key('avatar')) ?? 0).clamp(0, _avatars.length - 1).toInt();
     if (mounted) setState(() => _loading = false);
   }
 
