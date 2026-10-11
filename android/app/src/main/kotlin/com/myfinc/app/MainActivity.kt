@@ -1,10 +1,13 @@
 package com.myfinc.app
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -17,6 +20,21 @@ class MainActivity : FlutterActivity() {
     private val notificationChannel = "com.myfinc.app/notifications"
     private val notificationPermissionRequestCode = 7314
     private var pendingNotificationPermissionResult: MethodChannel.Result? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "myfinc_general",
+                "Notificaciones de MyFinc",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Avisos y notificaciones de MyFinc"
+            }
+            getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(channel)
+        }
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
