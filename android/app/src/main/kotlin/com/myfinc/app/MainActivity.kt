@@ -31,12 +31,14 @@ class MainActivity : FlutterActivity() {
                 "Notificaciones de MyFinc",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Avisos y notificaciones de MyFinc",
-                sound = DEFAULT_NOTIFICATION_URI,
-                audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
+                description = "Avisos y notificaciones de MyFinc"
+                setSound(
+                    DEFAULT_NOTIFICATION_URI,
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
             }
             getSystemService(NotificationManager::class.java)
                 .createNotificationChannel(channel)
