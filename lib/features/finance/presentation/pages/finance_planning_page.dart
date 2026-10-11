@@ -67,7 +67,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
       final start = DateTime(now.year, now.month, 1);
       final end = DateTime(now.year, now.month + 1, 1);
       final spendRows = await db.rawQuery('''
-        SELECT COALESCE(SUM(COALESCE(amount_minor / 100.0, amount)), 0) AS total
+        SELECT COALESCE(SUM(amount), 0) AS total
         FROM transactions
         WHERE user_id = ? AND type = ? AND date >= ? AND date < ?
       ''', [
