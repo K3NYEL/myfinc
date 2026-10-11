@@ -584,10 +584,11 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () async {
+                      final messenger = ScaffoldMessenger.of(context);
                       final saved = await context.push<bool>('/settings/profile');
                       await _loadProfile();
                       if (saved == true && mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           const SnackBar(
                             content: Text('Personalización guardada y aplicada al perfil.'),
                           ),
