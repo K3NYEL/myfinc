@@ -57,6 +57,8 @@ class FcmService {
 
     final messaging = FirebaseMessaging.instance;
     try {
+      // Broadcast announcements published from the MyFinc admin panel.
+      await messaging.subscribeToTopic('myfinc_announcements');
       _token = await messaging.getToken();
     } catch (error) {
       // Token retrieval can fail temporarily; keep message listeners active.
