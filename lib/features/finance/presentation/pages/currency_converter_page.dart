@@ -1,0 +1,304 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+/// Conversor informativo. Nunca modifica saldos ni transacciones guardados.
+class CurrencyConverterPage extends StatefulWidget {
+  const CurrencyConverterPage({super.key});
+
+  @override
+  State<CurrencyConverterPage> createState() => _CurrencyConverterPageState();
+}
+
+class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
+  static const _currencies = <String, String>{
+    'DOP': 'Peso dominicano',
+    'USD': 'Dólar estadounidense',
+    'EUR': 'Euro',
+    'GBP': 'Libra esterlina',
+    'CAD': 'Dólar canadiense',
+    'MXN': 'Peso mexicano',
+    'COP': 'Peso colombiano',
+    'ARS': 'Peso argentino',
+    'BRL': 'Real brasileño',
+    'JPY': 'Yen japonés',
+    'CHF': 'Franco suizo',
+    'CNY': 'Yuan chino',
+    'PEN': 'Sol peruano',
+    'CLP': 'Peso chileno',
+    'CRC': 'Colón costarricense',
+    'GTQ': 'Quetzal guatemalteco',
+    'HNL': 'Lempira hondureño',
+    'JMD': 'Dólar jamaiquino',
+    'TTD': 'Dólar trinitense',
+    'VES': 'Bolívar venezolano',
+  };
+
+  final _amountController = TextEditingController(text: '1');
+  String _from = 'DOP';
+  String _to = 'USD';
+  Map<String, dynamic> _rates = {};
+  DateTime? _updatedAt;
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRates();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  double get _amount =>
+      double.tryParse(_amountController.text.trim().replaceAll(',', '.')) ?? 0;
+
+  double? get _rate {
+    if (_from == _to) return 1;
+    final value = _rates[_to];
+    return value is num ? value.toDouble() : null;
+  }
+
+  double? get _converted {
+    final rate = _rate;
+    if (rate == null) return null;
+    return _amount * rate;
+  }
+
+  Future<void> _loadRates() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final uri = Uri.https('open.er-api.com', '/v6/latest/$_from');
+      final response = await http.get(uri).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) {
+        throw Exception('El servicio respondió con código ${response.statusCode}.');
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic> || decoded['result'] != 'success') {
+        throw Exception('El proveedor no devolvió tasas válidas.');
+      }
+      final rates = decoded['rates'];
+      if (rates is! Map<String, dynamic>) {
+        throw Exception('No se encontraron tasas de conversión.');
+      }
+      if (!mounted) return;
+      setState(() {
+        _rates = rates;
+        _updatedAt = DateTime.tryParse(decoded['time_last_update_utc']?.toString() ?? '')?.toLocal();
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = 'No se pudieron actualizar las tasas. Comprueba tu conexión e inténtalo de nuevo.';
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  String _format(double value) => value.toStringAsFixed(2).replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (match) => ',',
+      );
+
+  String _currencyLabel(String code) => '$code · ${_currencies[code] ?? code}';
+
+  Future<void> _selectCurrency({required bool from}) async {
+    final selected = from ? _from : _to;
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Text('Seleccionar moneda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            ),
+            for (final entry in _currencies.entries)
+              ListTile(
+                title: Text(entry.key),
+                subtitle: Text(entry.value),
+                trailing: entry.key == selected ? const Icon(Icons.check_circle_rounded) : null,
+                onTap: () => Navigator.pop(context, entry.key),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      if (from) {
+        _from = result;
+      } else {
+        _to = result;
+      }
+      if (_from == _to) {
+        _rates = {_to: 1.0};
+      }
+    });
+    await _loadRates();
+  }
+
+  void _swapCurrencies() {
+    setState(() {
+      final oldFrom = _from;
+      _from = _to;
+      _to = oldFrom;
+    });
+    _loadRates();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Conversor de monedas'),
+        actions: [
+          IconButton(
+            tooltip: 'Actualizar tasas',
+            onPressed: _loading ? null : _loadRates,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Conversión rápida', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 6),
+                  Text('Consulta tasas de cambio actuales sin modificar tus cuentas ni movimientos.', style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Cantidad',
+                      prefixIcon: const Icon(Icons.payments_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _selectCurrency(from: true),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('De'),
+                              const SizedBox(height: 4),
+                              Text(_from, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                              Text(_currencies[_from] ?? _from, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
+                            ],
+                          ),
+                        ),
+                      ),
+                      IconButton.filledTonal(
+                        tooltip: 'Invertir monedas',
+                        onPressed: _swapCurrencies,
+                        icon: const Icon(Icons.swap_horiz_rounded),
+                      ),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _selectCurrency(from: false),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('A'),
+                              const SizedBox(height: 4),
+                              Text(_to, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                              Text(_currencies[_to] ?? _to, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  if (_loading)
+                    const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()))
+                  else if (_error != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_error!, style: TextStyle(color: scheme.error)),
+                        const SizedBox(height: 8),
+                        FilledButton.tonalIcon(
+                          onPressed: _loadRates,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Reintentar'),
+                        ),
+                      ],
+                    )
+                  else
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Resultado estimado', style: TextStyle(color: scheme.onPrimaryContainer)),
+                          const SizedBox(height: 6),
+                          Text(
+                            _converted == null ? '—' : '${_format(_converted!)} $_to',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              color: scheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          if (_rate != null) ...[
+                            const SizedBox(height: 8),
+                            Text('1 $_from = ${_format(_rate!)} $_to', style: TextStyle(color: scheme.onPrimaryContainer)),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          ListTile(
+            leading: const Icon(Icons.info_outline_rounded),
+            title: const Text('Tipo de cambio informativo'),
+            subtitle: Text(
+              _updatedAt == null
+                  ? 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.'
+                  : 'Última actualización del proveedor: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'La conversión es una estimación. Las comisiones bancarias y el tipo aplicado por tu entidad pueden ser distintos.',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+}
