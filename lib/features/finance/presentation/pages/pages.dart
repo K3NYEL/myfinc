@@ -508,78 +508,94 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                             'Perfil de este dispositivo',
                             style: _muted(context),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(height: 1),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ID de usuario', style: _muted(context)),
-                          const SizedBox(height: 4),
-                          SelectableText(
-                            user == null
-                                ? 'No disponible'
-                                : user.id.replaceFirst(RegExp(r'^usr_'), ''),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontFamily: 'monospace',
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (user != null)
-                      IconButton(
-                        tooltip: 'Copiar ID',
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(
-                              text: user.id.replaceFirst(RegExp(r'^usr_'), ''),
+                          if (_profileBio?.trim().isNotEmpty == true) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              _profileBio!.trim(),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                          );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('ID copiado')),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.copy_rounded),
+                          ],
+                        ],
                       ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                _profileDetail(
-                  context,
-                  icon: Icons.event_outlined,
-                  label: 'Cuenta creada',
-                  value: formatDateTime(user?.createdAt),
-                ),
-                if (_profileBio?.trim().isNotEmpty == true) ...[
-                  const SizedBox(height: 8),
-                  _profileDetail(
-                    context,
-                    icon: Icons.short_text_rounded,
-                    label: 'Descripción',
-                    value: _profileBio!.trim(),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                _profileDetail(
-                  context,
-                  icon: Icons.login_rounded,
-                  label: 'Último acceso',
-                  value: formatDateTime(user?.lastLogin),
-                ),
                 const SizedBox(height: 16),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: const Text('Detalles de la cuenta'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('ID de usuario', style: _muted(dialogContext)),
+                              const SizedBox(height: 4),
+                              SelectableText(
+                                user == null
+                                    ? 'No disponible'
+                                    : user.id.replaceFirst(RegExp(r'^usr_'), ''),
+                                style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
+                                      fontFamily: 'monospace',
+                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              _profileDetail(
+                                dialogContext,
+                                icon: Icons.event_outlined,
+                                label: 'Cuenta creada',
+                                value: formatDateTime(user?.createdAt),
+                              ),
+                              const SizedBox(height: 8),
+                              _profileDetail(
+                                dialogContext,
+                                icon: Icons.login_rounded,
+                                label: 'Último acceso',
+                                value: formatDateTime(user?.lastLogin),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            if (user != null)
+                              TextButton.icon(
+                                onPressed: () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(
+                                      text: user.id.replaceFirst(RegExp(r'^usr_'), ''),
+                                    ),
+                                  );
+                                  if (dialogContext.mounted) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('ID copiado')),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.copy_rounded),
+                                label: const Text('Copiar ID'),
+                              ),
+                            TextButton(
+                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              child: const Text('Cerrar'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline_rounded),
+                    label: const Text('Ver detalles'),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
