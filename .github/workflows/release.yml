@@ -1,0 +1,281 @@
+name: MyFinc Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing release tag to build and attach APKs to (for example v0.1.0)"
+        required: true
+        default: "v0.1.0"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: myfinc-release-${{ inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-android:
+    name: Build and verify Android APKs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Configure required reviewers for this environment in GitHub Settings.
+    environment:
+      name: production-release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Ensure release tag points to main history
+        shell: bash
+        env:
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          RELEASE_TAG="$RELEASE_TAG_INPUT"
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Release tag must use the format vMAJOR.MINOR.PATCH."
+            exit 1
+          fi
+          git fetch origin main --no-tags
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          TAG_SHA="$(git rev-parse "$RELEASE_TAG^{commit}")"
+          if ! git merge-base --is-ancestor "$TAG_SHA" "origin/main"; then
+            echo "ERROR: Release tags must point to a commit contained in main history."
+            exit 1
+          fi
+
+          # Build the exact commit referenced by the selected release tag, including
+          # workflow_dispatch runs started from a branch other than the tag.
+          git checkout --detach "$TAG_SHA"
+          echo "Building release tag $RELEASE_TAG at commit $TAG_SHA"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Android Build Tools
+        shell: bash
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          fi
+          test -x "$SDKMANAGER"
+          # sdkmanager may close the pipe after accepting all licenses; avoid failing on yes SIGPIPE.
+          set +o pipefail
+          yes | "$SDKMANAGER" --licenses >/dev/null
+          set -o pipefail
+          "$SDKMANAGER" --install "build-tools;36.0.0"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
+
+      - name: Flutter version
+        run: |
+          flutter --version
+          java -version
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Configure Android signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_BASE64" || { echo "ERROR: ANDROID_KEYSTORE_BASE64 is missing."; exit 1; }
+          test -n "$STORE_PASSWORD" || { echo "ERROR: ANDROID_KEYSTORE_PASSWORD is missing."; exit 1; }
+          test -n "$KEY_PASSWORD" || { echo "ERROR: ANDROID_KEY_PASSWORD is missing."; exit 1; }
+          test -n "$KEY_ALIAS" || { echo "ERROR: ANDROID_KEY_ALIAS is missing."; exit 1; }
+
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/myfinc-release.jks
+          test -s android/app/myfinc-release.jks
+
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=${{ github.workspace }}/android/app/myfinc-release.jks
+          EOF
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Extract and validate release version
+        id: version
+        shell: bash
+        env:
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          BUILD="$(grep '^version:' pubspec.yaml | sed -E 's/^version:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+).*/\1/')"
+
+          if [ -z "$VERSION" ] || [ -z "$BUILD" ]; then
+            echo "ERROR: Could not extract version/build from pubspec.yaml."
+            exit 1
+          fi
+
+          RELEASE_TAG="$RELEASE_TAG_INPUT"
+          TAG_VERSION="${RELEASE_TAG#v}"
+          if [ "$TAG_VERSION" != "$VERSION" ]; then
+            echo "ERROR: Git tag v$TAG_VERSION does not match pubspec.yaml version $VERSION."
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+          echo "Release build: $BUILD"
+
+      - name: Build split release APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Verify all APKs and compare signing certificate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          APK_DIR="build/app/outputs/flutter-apk"
+
+          for ABI in arm64-v8a armeabi-v7a x86_64; do
+            APK="$APK_DIR/app-$ABI-release.apk"
+            test -s "$APK"
+            "$APKSIGNER" verify --verbose "$APK"
+            echo "Verified signature: $APK"
+          done
+
+          # Find the newest earlier published release that has an ARM64 APK.
+          # /releases/latest can point to the current, still-empty release while this job runs.
+          curl --fail --silent --show-error \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            -o /tmp/myfinc-releases.json
+
+          PREVIOUS_APK_URL="$(python3 - "$RELEASE_TAG" <<'PY'
+          import json
+          import sys
+
+          current_tag = sys.argv[1]
+          with open("/tmp/myfinc-releases.json", encoding="utf-8") as f:
+              releases = json.load(f)
+
+          previous_url = ""
+          for release in releases:
+              if release.get("draft") or release.get("tag_name") == current_tag:
+                  continue
+              for asset in release.get("assets", []):
+                  if asset.get("name", "").endswith("_arm64-v8a.apk"):
+                      previous_url = asset.get("browser_download_url", "")
+                      if previous_url:
+                          break
+              if previous_url:
+                  break
+
+          print(previous_url)
+          PY
+          )"
+          if [ -z "$PREVIOUS_APK_URL" ]; then
+            echo "ERROR: Could not find the previous published ARM64 APK to verify signing continuity."
+            exit 1
+          fi
+
+          curl --fail --location --silent --show-error "$PREVIOUS_APK_URL" -o /tmp/myfinc-previous-arm64.apk
+          "$APKSIGNER" verify --verbose /tmp/myfinc-previous-arm64.apk
+
+          CURRENT_CERT="$("$APKSIGNER" verify --print-certs "$APK_DIR/app-arm64-v8a-release.apk" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1)"
+          PREVIOUS_CERT="$("$APKSIGNER" verify --print-certs /tmp/myfinc-previous-arm64.apk | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1)"
+
+          if [ -z "$CURRENT_CERT" ] || [ -z "$PREVIOUS_CERT" ]; then
+            echo "ERROR: Could not extract signing certificate SHA-256 digests."
+            exit 1
+          fi
+          if [ "$CURRENT_CERT" != "$PREVIOUS_CERT" ]; then
+            echo "ERROR: Current APK signing certificate differs from the previous release."
+            echo "Refusing to publish APKs signed with a different key."
+            exit 1
+          fi
+          echo "Signing certificate matches the previous published release."
+
+      - name: Rename release artifacts
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          APK_DIR="build/app/outputs/flutter-apk"
+          mv "$APK_DIR/app-arm64-v8a-release.apk" "$APK_DIR/MyFinc_v${VERSION}_arm64-v8a.apk"
+          mv "$APK_DIR/app-armeabi-v7a-release.apk" "$APK_DIR/MyFinc_v${VERSION}_armeabi-v7a.apk"
+          mv "$APK_DIR/app-x86_64-release.apk" "$APK_DIR/MyFinc_v${VERSION}_x86_64.apk"
+
+          for ABI in arm64-v8a armeabi-v7a x86_64; do
+            test -s "$APK_DIR/MyFinc_v${VERSION}_${ABI}.apk"
+          done
+
+      - name: Generate and verify SHA-256 checksums
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          APK_DIR="build/app/outputs/flutter-apk"
+          cd "$APK_DIR"
+          sha256sum "MyFinc_v${VERSION}"_arm64-v8a.apk \
+                    "MyFinc_v${VERSION}"_armeabi-v7a.apk \
+                    "MyFinc_v${VERSION}"_x86_64.apk \
+            > "MyFinc_v${VERSION}_SHA256SUMS.txt"
+          sha256sum --check "MyFinc_v${VERSION}_SHA256SUMS.txt"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          generate_release_notes: true
+          body: |
+            ## MyFinc v${{ steps.version.outputs.version }}
+
+            **Versión:** ${{ steps.version.outputs.version }}
+            **Build:** ${{ steps.version.outputs.build }}
+
+            Esta release fue generada automáticamente por GitHub Actions.
+            Las APK se verifican antes de publicar y se incluyen sumas SHA-256.
+          files: |
+            build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_arm64-v8a.apk
+            build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_armeabi-v7a.apk
+            build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_x86_64.apk
+            build/app/outputs/flutter-apk/MyFinc_v${{ steps.version.outputs.version }}_SHA256SUMS.txt
+
+      - name: Clean signing files
+        if: always()
+        run: |
+          rm -f android/key.properties
+          rm -f android/app/myfinc-release.jks

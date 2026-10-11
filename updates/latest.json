@@ -1,0 +1,14 @@
+{
+  "version": "0.1.0",
+  "build": 1,
+  "release": "v0.1.0",
+  "mandatory": false,
+  "notes": [
+    "Versión inicial de MyFinc."
+  ],
+  "android": {
+    "arm64-v8a": "https://github.com/K3NYEL/myfinc/releases/download/v0.1.0/MyFinc_v0.1.0_arm64-v8a.apk",
+    "armeabi-v7a": "https://github.com/K3NYEL/myfinc/releases/download/v0.1.0/MyFinc_v0.1.0_armeabi-v7a.apk",
+    "x86_64": "https://github.com/K3NYEL/myfinc/releases/download/v0.1.0/MyFinc_v0.1.0_x86_64.apk"
+  }
+}

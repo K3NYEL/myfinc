@@ -1,0 +1,138 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../errors/app_exception.dart';
+import 'api_config.dart';
+
+/// JSON HTTP transport for MyFinc DataBase.
+/// Financial sync remains opt-in and is never started by this transport.
+class MyFincApiClient {
+  MyFincApiClient({http.Client? httpClient, Duration timeout = const Duration(seconds: 15)})
+      : _http = httpClient ?? http.Client(),
+        _timeout = timeout;
+
+  final http.Client _http;
+  final Duration _timeout;
+
+  bool get isConfigured => MyFincApiConfig.isConfigured;
+
+  Future<Map<String, dynamic>> getJson(String path, {String? bearerToken}) =>
+      _sendJson('GET', path, bearerToken: bearerToken);
+
+  Future<Map<String, dynamic>> postJson(
+    String path, {
+    required Map<String, Object?> body,
+    String? bearerToken,
+    String? idempotencyKey,
+  }) =>
+      _sendJson(
+        'POST',
+        path,
+        body: body,
+        bearerToken: bearerToken,
+        idempotencyKey: idempotencyKey,
+      );
+
+  Future<Map<String, dynamic>> _sendJson(
+    String method,
+    String path, {
+    Map<String, Object?>? body,
+    String? bearerToken,
+    String? idempotencyKey,
+  }) async {
+    if (!isConfigured) {
+      throw const AppException('El servidor de MyFinc todavía no está configurado en esta instalación.');
+    }
+    if (bearerToken != null && !RegExp(r'^[A-Za-z0-9_-]{40,60}$').hasMatch(bearerToken)) {
+      throw const AppException('La sesión del servidor no tiene un formato válido.');
+    }
+    if (idempotencyKey != null &&
+        !RegExp(r'^[A-Za-z0-9._:-]{8,128}$').hasMatch(idempotencyKey)) {
+      throw const AppException('La clave de operación no tiene un formato válido.');
+    }
+
+    final baseUri = MyFincApiConfig.baseUri;
+    final parsedPath = Uri.tryParse(path);
+    if (parsedPath == null ||
+        parsedPath.hasScheme ||
+        parsedPath.hasAuthority ||
+        path.startsWith('//') ||
+        parsedPath.path.isEmpty ||
+        parsedPath.pathSegments.contains('..')) {
+      throw const AppException('La ruta solicitada para la API no es válida.');
+    }
+
+    final normalizedPath = path.replaceFirst(RegExp(r'^/+'), '');
+    final uri = baseUri.resolve(normalizedPath);
+    if (uri.scheme != baseUri.scheme ||
+        uri.host != baseUri.host ||
+        uri.port != baseUri.port) {
+      throw const AppException('La ruta solicitada para la API no es válida.');
+    }
+
+    if (uri.scheme != 'https' && !{'localhost', '127.0.0.1', '10.0.2.2'}.contains(uri.host)) {
+      throw const AppException('La API debe utilizar HTTPS fuera del entorno local.');
+    }
+
+    try {
+      final request = http.Request(method, uri)
+        ..headers['Accept'] = 'application/json';
+      if (bearerToken != null) {
+        request.headers['Authorization'] = 'Bearer $bearerToken';
+      }
+      if (idempotencyKey != null) {
+        request.headers['Idempotency-Key'] = idempotencyKey;
+      }
+      if (body != null) {
+        request.headers['Content-Type'] = 'application/json; charset=utf-8';
+        request.body = jsonEncode(body);
+      }
+      final streamed = await _http.send(request).timeout(_timeout);
+      final response = await http.Response.fromStream(streamed).timeout(_timeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw AppException(_safeServerMessage(response.statusCode));
+      }
+      if (response.body.trim().isEmpty) return <String, dynamic>{};
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw const AppException('El servidor devolvió una respuesta no válida.');
+      }
+      return decoded;
+    } on AppException {
+      rethrow;
+    } on TimeoutException {
+      throw const AppException('El servidor tardó demasiado en responder. Inténtalo de nuevo.');
+    } on http.ClientException {
+      throw const AppException('No se pudo conectar con el servidor de MyFinc.');
+    } on FormatException {
+      throw const AppException('El servidor devolvió datos con un formato no válido.');
+    }
+  }
+
+  // Never display server-provided text: even short messages can contain
+  // internal details, HTML, or attacker-controlled content.
+  String _safeServerMessage(int statusCode) {
+    switch (statusCode) {
+      case 400:
+        return 'La solicitud de MyFinc no es válida.';
+      case 401:
+        return 'La sesión del servidor no es válida.';
+      case 403:
+        return 'No tienes permiso para realizar esta operación.';
+      case 404:
+        return 'La función solicitada no está disponible en el servidor.';
+      case 409:
+        return 'Los datos cambiaron. Actualiza la información e inténtalo de nuevo.';
+      case 429:
+        return 'Se hicieron demasiadas solicitudes. Espera un momento.';
+      default:
+        return statusCode >= 500
+            ? 'El servidor de MyFinc tuvo un problema. Inténtalo más tarde.'
+            : 'La solicitud no pudo completarse (HTTP $statusCode).';
+    }
+  }
+
+  void close() => _http.close();
+}

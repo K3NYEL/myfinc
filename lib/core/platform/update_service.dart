@@ -1,0 +1,175 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+import '../update/data/github_release_repository.dart';
+import '../update/domain/update_info.dart';
+import '../update/services/apk_installer.dart';
+
+export '../update/domain/update_info.dart';
+export '../update/services/apk_installer.dart' show ApkInstallResult;
+
+class UpdateService {
+  const UpdateService._();
+
+  static const GithubReleaseRepository _releaseRepository =
+      GithubReleaseRepository();
+
+  static Future<UpdateInfo?> checkForUpdate() async {
+    if (kIsWeb) return null;
+
+    try {
+      final release = await _releaseRepository.fetchLatestRelease();
+      final packageInfo = await PackageInfo.fromPlatform();
+
+      final currentVersion = packageInfo.version;
+      final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
+      final latestVersion = release.version;
+      final latestBuild = release.build;
+
+      debugPrint(
+        '[MYFINC UPDATE] Versión instalada: $currentVersion+$currentBuild',
+      );
+      debugPrint(
+        '[MYFINC UPDATE] Última release de GitHub: $latestVersion+$latestBuild',
+      );
+
+      if (!_isNewer(
+        latestVersion,
+        latestBuild,
+        currentVersion,
+        currentBuild,
+      )) {
+        debugPrint('[MYFINC UPDATE] MyFinc está actualizada.');
+        return null;
+      }
+
+      UpdateAsset? apk;
+      if (Platform.isAndroid) {
+        apk = await _selectApk(release.assets, latestVersion);
+      }
+
+      return UpdateInfo(
+        currentVersion: currentVersion,
+        currentBuild: currentBuild,
+        latestVersion: latestVersion,
+        latestBuild: latestBuild,
+        releaseName: release.name,
+        releaseUrl:
+            'https://github.com/K3NYEL/myfinc/releases/tag/${release.tagName}',
+        mandatory: false,
+        notes: _extractNotes(release.body),
+        apk: apk,
+      );
+    } on UpdateCheckException {
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint('[MYFINC UPDATE] Error inesperado: $e');
+      debugPrint(stackTrace.toString());
+      throw const UpdateCheckException(
+        'No se pudo comprobar la última release de MyFinc.',
+      );
+    }
+  }
+
+  static Future<ApkInstallResult> downloadAndInstall(
+    UpdateInfo update, {
+    void Function(int receivedBytes, int? totalBytes)? onProgress,
+    VoidCallback? onOpeningInstaller,
+  }) async {
+    final apk = update.apk;
+    if (apk == null || apk.downloadUrl.isEmpty) {
+      debugPrint('[MYFINC UPDATE] No hay APK disponible para este dispositivo.');
+      return ApkInstallResult.failed;
+    }
+
+    return ApkInstaller.downloadAndInstall(
+      apk,
+      onProgress: onProgress,
+      onOpeningInstaller: onOpeningInstaller,
+    );
+  }
+
+  static Future<UpdateAsset?> _selectApk(
+    Map<String, ReleaseAsset> assets,
+    String latestVersion,
+  ) async {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final abis = androidInfo.supportedAbis;
+    debugPrint('[MYFINC UPDATE] ABIs del dispositivo: $abis');
+
+    String? architecture;
+    if (abis.contains('arm64-v8a')) {
+      architecture = 'arm64-v8a';
+    } else if (abis.contains('armeabi-v7a')) {
+      architecture = 'armeabi-v7a';
+    } else if (abis.contains('x86_64')) {
+      architecture = 'x86_64';
+    }
+    if (architecture == null) {
+      debugPrint('[MYFINC UPDATE] Arquitectura no compatible.');
+      return null;
+    }
+
+    final normalizedVersion = latestVersion.startsWith('v')
+        ? latestVersion.substring(1)
+        : latestVersion;
+    final apkName = 'MyFinc_v${normalizedVersion}_$architecture.apk';
+    final asset = assets[apkName];
+    if (asset == null) {
+      debugPrint('[MYFINC UPDATE] GitHub Release no contiene $apkName');
+      return null;
+    }
+
+    // Fail closed: do not install release assets without GitHub SHA-256 metadata.
+    if (asset.sha256 == null ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(asset.sha256!)) {
+      debugPrint('[MYFINC UPDATE] GitHub no proporciona un SHA-256 válido para $apkName.');
+      return null;
+    }
+
+    debugPrint('[MYFINC UPDATE] APK seleccionado con SHA-256 verificado: $apkName');
+    return UpdateAsset(
+      name: asset.name,
+      downloadUrl: asset.downloadUrl,
+      size: asset.size,
+      sha256: asset.sha256,
+    );
+  }
+
+  static List<String> _extractNotes(String body) {
+    return body
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.startsWith('- '))
+        .map((line) => line.substring(2).trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
+  static bool _isNewer(
+    String latestVersion,
+    int latestBuild,
+    String currentVersion,
+    int currentBuild,
+  ) {
+    final latest = _parseVersion(latestVersion);
+    final current = _parseVersion(currentVersion);
+    for (var i = 0; i < 3; i++) {
+      if (latest[i] > current[i]) return true;
+      if (latest[i] < current[i]) return false;
+    }
+    return latestBuild > currentBuild;
+  }
+
+  static List<int> _parseVersion(String version) {
+    final clean = version.trim().replaceFirst('v', '');
+    final parts = clean.split('.');
+    return List.generate(3, (index) {
+      if (index >= parts.length) return 0;
+      return int.tryParse(parts[index].replaceAll(RegExp(r'[^0-9].*'), '')) ?? 0;
+    });
+  }
+}

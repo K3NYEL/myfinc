@@ -1,0 +1,35 @@
+name: MyFinc DataBase starter validation
+
+on:
+  pull_request:
+    paths:
+      - "myfinc-database-starter/**"
+      - ".github/workflows/myfinc-database-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "myfinc-database-starter/**"
+      - ".github/workflows/myfinc-database-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: myfinc-database-starter
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
