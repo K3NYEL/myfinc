@@ -43,6 +43,7 @@ class _NotificationsAndPatchesDialogState
   }
 
   Widget _notificationList(BuildContext context) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     final items = NotificationInboxService.instance.items;
     if (items.isEmpty) {
       return const Padding(
@@ -92,7 +93,7 @@ class _NotificationsAndPatchesDialogState
       if (!mounted) return;
       if (update == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(isEnglish ? 'There is no pending installed update.' : 'No hay una actualización instalada pendiente.')),
+          SnackBar(content: Text(Localizations.localeOf(context).languageCode == 'en' ? 'There is no pending installed update.' : 'No hay una actualización instalada pendiente.')),
         );
         return;
       }
@@ -110,7 +111,7 @@ class _NotificationsAndPatchesDialogState
   }
 
   String _dateLabel(DateTime? value) {
-    if (value == null) return (isEnglish ? 'Date not provided' : 'Fecha no indicada');
+    if (value == null) return 'Fecha no indicada';
     final date = value.toLocal();
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
