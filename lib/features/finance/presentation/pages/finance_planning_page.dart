@@ -41,16 +41,20 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
   Future<void> _load() async {
     final user = ref.read(sessionProvider);
     if (user == null) {
-      if (mounted) setState(() {
-        _loading = false;
-        _error = 'Inicia sesión para consultar tu planificación financiera.';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = 'Inicia sesión para consultar tu planificación financiera.';
+        });
+      }
       return;
     }
-    if (mounted) setState(() {
-      _loading = true;
-      _error = null;
-    });
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final db = await AppDatabase.instance;
       final budgets = await db.query(
