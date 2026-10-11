@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/currency_utils.dart';
@@ -299,8 +301,64 @@ Widget _profileDetail(
   );
 }
 
-class AccountsPage extends ConsumerWidget {
+class AccountsPage extends ConsumerStatefulWidget {
   const AccountsPage({super.key});
+
+  @override
+  ConsumerState<AccountsPage> createState() => _AccountsPageState();
+}
+
+class _AccountsPageState extends ConsumerState<AccountsPage> {
+  static const _profileColors = <Color>[
+    Color(0xFF2563EB),
+    Color(0xFF0D9488),
+    Color(0xFF7C3AED),
+    Color(0xFFDB2777),
+    Color(0xFFEA580C),
+    Color(0xFF16A34A),
+    Color(0xFF475569),
+    Color(0xFF0891B2),
+  ];
+  static const _profileAvatars = <IconData>[
+    Icons.person_rounded,
+    Icons.face_rounded,
+    Icons.emoji_emotions_rounded,
+    Icons.pets_rounded,
+    Icons.spa_rounded,
+    Icons.sports_esports_rounded,
+    Icons.music_note_rounded,
+    Icons.star_rounded,
+  ];
+
+  String? _profileName;
+  String? _profileBio;
+  int _profileColor = 0;
+  int _profileAvatar = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = ref.read(sessionProvider);
+    if (user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('profile_display_name:${user.id}') ?? user.fullName;
+    final bio = prefs.getString('profile_bio:${user.id}') ?? '';
+    final color = (prefs.getInt('profile_color:${user.id}') ?? 0)
+        .clamp(0, _profileColors.length - 1).toInt();
+    final avatar = (prefs.getInt('profile_avatar:${user.id}') ?? 0)
+        .clamp(0, _profileAvatars.length - 1).toInt();
+    if (!mounted) return;
+    setState(() {
+      _profileName = name;
+      _profileBio = bio;
+      _profileColor = color;
+      _profileAvatar = avatar;
+    });
+  }
 
   Future<void> _new(BuildContext c, WidgetRef ref) async {
     final name = TextEditingController();
@@ -379,7 +437,7 @@ class AccountsPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final accounts = ref.watch(accountsProvider);
     if (accounts.hasError) {
       return AsyncStateView(
@@ -426,14 +484,9 @@ class AccountsPage extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 27,
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                      child: Text(
-                        user == null
-                            ? '?'
-                            : '${user.firstName.trim().isNotEmpty ? user.firstName.trim()[0].toUpperCase() : ''}${user.lastName.trim().isNotEmpty ? user.lastName.trim()[0].toUpperCase() : ''}',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
+                      backgroundColor: _profileColors[_profileColor],
+                      foregroundColor: Colors.white,
+                      child: Icon(_profileAvatars[_profileAvatar], size: 30),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -441,9 +494,11 @@ class AccountsPage extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user?.fullName.trim().isNotEmpty == true
-                                ? user!.fullName.trim()
-                                : 'Perfil local',
+                            _profileName?.trim().isNotEmpty == true
+                                ? _profileName!.trim()
+                                : (user?.fullName.trim().isNotEmpty == true
+                                    ? user!.fullName.trim()
+                                    : 'Perfil local'),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -508,12 +563,33 @@ class AccountsPage extends ConsumerWidget {
                   label: 'Cuenta creada',
                   value: formatDateTime(user?.createdAt),
                 ),
+                if (_profileBio?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  _profileDetail(
+                    context,
+                    icon: Icons.short_text_rounded,
+                    label: 'Descripción',
+                    value: _profileBio!.trim(),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 _profileDetail(
                   context,
                   icon: Icons.login_rounded,
                   label: 'Último acceso',
                   value: formatDateTime(user?.lastLogin),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await context.push('/settings/profile');
+                      await _loadProfile();
+                    },
+                    icon: const Icon(Icons.manage_accounts_outlined),
+                    label: const Text('Personalizar perfil'),
+                  ),
                 ),
               ],
             ),
