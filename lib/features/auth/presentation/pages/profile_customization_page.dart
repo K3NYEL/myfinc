@@ -43,7 +43,7 @@ class _ProfileCustomizationPageState
   bool _loading = true;
   bool _saving = false;
 
-  String _key(String field) => 'profile_${field}:${_userId ?? ''}';
+  String _key(String field) => 'profile_$field:${_userId ?? ''}';
 
   @override
   void initState() {
