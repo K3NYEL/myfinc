@@ -72,7 +72,7 @@ class _NotificationsAndPatchesDialogState
               title: Text(item.title),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text('${item.message}\\n${_dateLabel(item.receivedAt)}'),
+                child: Text('${item.message}\n${_dateLabel(item.receivedAt)}'),
               ),
               trailing: IconButton(
                 tooltip: 'Eliminar notificación',
