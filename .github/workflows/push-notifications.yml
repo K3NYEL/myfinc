@@ -46,6 +46,11 @@ jobs:
           const admin = require('firebase-admin');
 
           async function main() {
+            if (process.env.EVENT_NAME === 'workflow_dispatch') {
+              console.log('Manual run is a health check only; it does not resend notices. Publish a new notice to trigger delivery.');
+              return;
+            }
+
             const rawCredentials = process.env.FIREBASE_SERVICE_ACCOUNT;
             if (!rawCredentials) {
               throw new Error(
@@ -91,9 +96,6 @@ jobs:
                 // Fail closed rather than broadcast every old notice.
                 return;
               }
-            } else if (process.env.EVENT_NAME === 'workflow_dispatch') {
-              console.log('Manual run does not resend existing notices. Publish a new notice to trigger delivery.');
-              return;
             }
 
             const newNotices = currentNotices.filter((notice) =>
