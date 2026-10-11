@@ -121,23 +121,17 @@ CustomTransitionPage<void> _page(
     transitionsBuilder: (context, animation, __, child) {
       if (MediaQuery.disableAnimationsOf(context)) return child;
 
-      return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOut,
-        ),
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0.04, 0),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0.04, 0),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
           ),
-          child: child,
         ),
+        child: child,
       );
     },
   );
