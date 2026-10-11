@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/settings_provider.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/updates/notifications_and_patches_dialog.dart';
 import '../../../../core/notifications/notification_permission_service.dart';
@@ -115,6 +116,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isEnglish = ref.watch(settingsProvider).languageCode == 'en';
     final accountsState = ref.watch(accountsProvider);
     final summaryState = ref.watch(summaryProvider);
     final movementsState = ref.watch(movementsProvider);
@@ -139,7 +141,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Tu resumen financiero', style: mutedStyle),
+                  Text(isEnglish ? 'Your financial overview' : 'Tu resumen financiero', style: mutedStyle),
                 ],
               ),
             ),
@@ -149,7 +151,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 clipBehavior: Clip.none,
                 children: [
                   IconButton(
-                    tooltip: 'Notificaciones y parches',
+                    tooltip: isEnglish ? 'Notifications and patches' : 'Notificaciones y parches',
                     onPressed: () => showDialog<void>(
                       context: context,
                       builder: (_) => const NotificationsAndPatchesDialog(),
