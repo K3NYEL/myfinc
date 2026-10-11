@@ -7,6 +7,12 @@ on:
     paths:
       - "docs/updates/manifest.json"
   workflow_dispatch:
+    inputs:
+      send_test:
+        description: "Enviar una notificación de prueba al tema myfinc_announcements"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -38,6 +44,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           BEFORE_SHA: ${{ github.event.before }}
           EVENT_NAME: ${{ github.event_name }}
+          SEND_TEST: ${{ inputs.send_test || false }}
           FIREBASE_PROJECT_ID: myfinc-4b36e
         run: |
           node <<'NODE'
@@ -46,11 +53,7 @@ jobs:
           const admin = require('firebase-admin');
 
           async function main() {
-            if (process.env.EVENT_NAME === 'workflow_dispatch') {
-              console.log('Manual run is a health check only; it does not resend notices. Publish a new notice to trigger delivery.');
-              return;
-            }
-
+            const isManual = process.env.EVENT_NAME === 'workflow_dispatch';
             const rawCredentials = process.env.FIREBASE_SERVICE_ACCOUNT;
             if (!rawCredentials) {
               throw new Error(
@@ -67,6 +70,33 @@ jobs:
               credential: admin.credential.cert(credentials),
               projectId: process.env.FIREBASE_PROJECT_ID,
             });
+
+            if (isManual) {
+              if (process.env.SEND_TEST !== 'true') {
+                console.log('FCM credentials are valid. No test message requested; existing notices were not resent.');
+                return;
+              }
+              const messageId = await admin.messaging().send({
+                topic: 'myfinc_announcements',
+                notification: {
+                  title: 'MyFinc · Prueba de notificaciones',
+                  body: 'Firebase Cloud Messaging está conectado correctamente.',
+                },
+                data: {
+                  id: `fcm-test-${Date.now()}`,
+                  title: 'MyFinc · Prueba de notificaciones',
+                  body: 'Firebase Cloud Messaging está conectado correctamente.',
+                  level: 'info',
+                  source: 'fcm_test',
+                },
+                android: {
+                  priority: 'high',
+                  notification: { channelId: 'myfinc_general' },
+                },
+              });
+              console.log(`Test notification sent to myfinc_announcements; FCM message id: ${messageId}`);
+              return;
+            }
 
             const current = JSON.parse(
               fs.readFileSync('docs/updates/manifest.json', 'utf8')
