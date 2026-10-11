@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "425723060953",
+    "project_id": "myfinc-4b36e",
+    "storage_bucket": "myfinc-4b36e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425723060953:android:e8f454d6c74667e80b54c8",
+        "android_client_info": {
+          "package_name": "com.myfinc.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd-vrXzgn5ToZhm3UZEmbV5eNBsdM_T54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
