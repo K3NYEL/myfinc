@@ -46,9 +46,9 @@ class _NotificationsAndPatchesDialogState
     final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     final items = NotificationInboxService.instance.items;
     if (items.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 16),
-        child: Text((isEnglish ? 'There are no pending notifications.' : 'No hay notificaciones pendientes.')),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Text(isEnglish ? 'There are no pending notifications.' : 'No hay notificaciones pendientes.'),
       );
     }
     return Column(
