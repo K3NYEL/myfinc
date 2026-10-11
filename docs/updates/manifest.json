@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-11T18:44:33.442Z",
+  "updatedAt": "2026-10-11T18:48:32.301Z",
   "notifications": [
     {
-      "id": "aviso-11-octubre-2026",
-      "title": "Prueba 1 del Sistema de notificaciones",
-      "message": "Este es una notificacion de prueba",
-      "level": "info",
-      "publishedAt": "2026-10-11T18:44:32.573Z"
+      "id": "aviso-octubre-2026",
+      "title": "Prueba",
+      "message": "Aviso de Prueba",
+      "level": "warning",
+      "publishedAt": "2026-10-11T18:48:31.828Z"
     }
   ],
   "patches": []
