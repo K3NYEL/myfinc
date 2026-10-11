@@ -1108,12 +1108,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Cuenta',
           children: [
             _SettingsTile(
-              icon: Icons.manage_accounts_outlined,
-              title: 'Personalizar perfil',
-              subtitle: 'Nombre visible, descripción, avatar y color',
-              onTap: () => context.push('/settings/profile'),
-            ),
-            _SettingsTile(
               icon: Icons.cloud_sync_outlined,
               title: 'Vincular cuenta MyFinc',
               subtitle: 'Conectar una cuenta remota para preparar la futura sincronización',
