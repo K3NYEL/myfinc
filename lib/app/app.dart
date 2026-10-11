@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/notifications/fcm_service.dart';
+import '../features/auth/presentation/session_provider.dart';
 import 'router.dart';
 import 'settings_provider.dart';
 import 'theme/app_theme.dart';
@@ -9,11 +10,43 @@ import 'theme/app_theme.dart';
 final _lightTheme = buildAppTheme(Brightness.light);
 final _darkTheme = buildAppTheme(Brightness.dark);
 
-class MyFincApp extends ConsumerWidget {
+class MyFincApp extends ConsumerStatefulWidget {
   const MyFincApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyFincApp> createState() => _MyFincAppState();
+}
+
+class _MyFincAppState extends ConsumerState<MyFincApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Lock the app when it leaves the foreground. The remembered account is
+    // kept, but the in-memory session is cleared so the password is required
+    // again when MyFinc is opened.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      final session = ref.read(sessionProvider);
+      if (session != null) {
+        ref.read(sessionProvider.notifier).clearSession();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
 
     return MaterialApp.router(
