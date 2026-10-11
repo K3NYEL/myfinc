@@ -83,6 +83,19 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
 
   Future<void> _setDisplayCurrency(String code) async {
     if (code == _displayCurrency) return;
+    if (convertDisplayAmount(1, from: 'DOP', to: code) == null) {
+      final refreshed = await refreshDisplayExchangeRates();
+      if (!refreshed && convertDisplayAmount(1, from: 'DOP', to: code) == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+    }
     await AppPreferences.setCurrency(code);
     if (!mounted) return;
     setState(() => _displayCurrency = code);
@@ -333,7 +346,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Elige cómo se muestran los importes de MyFinc. Esto no convierte ni modifica los saldos y movimientos guardados.',
+                    'Convierte automáticamente los importes de cuentas, movimientos y estadísticas. Los valores originales guardados no se modifican.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
