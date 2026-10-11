@@ -81,7 +81,7 @@ class AppPreferences {
       case 'dark':
         return ThemePreference.dark;
       default:
-        return ThemePreference.system;
+        return ThemePreference.light;
     }
   }
 
