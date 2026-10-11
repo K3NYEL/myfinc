@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/notifications/fcm_service.dart';
 import 'router.dart';
 import 'settings_provider.dart';
 import 'theme/app_theme.dart';
@@ -16,6 +18,7 @@ class MyFincApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'MyFinc',
+      scaffoldMessengerKey: FcmService.scaffoldMessengerKey,
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: settings.themeMode,
