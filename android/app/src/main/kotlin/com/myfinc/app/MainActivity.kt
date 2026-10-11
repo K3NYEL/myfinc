@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.provider.Settings.System.DEFAULT_NOTIFICATION_URI
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,11 +27,16 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "myfinc_general",
+                "myfinc_general_v2",
                 "Notificaciones de MyFinc",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Avisos y notificaciones de MyFinc"
+                description = "Avisos y notificaciones de MyFinc",
+                sound = DEFAULT_NOTIFICATION_URI,
+                audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
             }
             getSystemService(NotificationManager::class.java)
                 .createNotificationChannel(channel)
