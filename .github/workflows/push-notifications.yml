@@ -13,6 +13,23 @@ on:
         required: true
         default: false
         type: boolean
+      send_update:
+        description: "Enviar manualmente un aviso de nueva versión"
+        required: true
+        default: false
+        type: boolean
+      release_version:
+        description: "Versión publicada, por ejemplo 0.1.5"
+        required: false
+        type: string
+      notification_title:
+        description: "Título personalizado (opcional)"
+        required: false
+        type: string
+      notification_body:
+        description: "Mensaje personalizado (opcional)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -45,6 +62,10 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           EVENT_NAME: ${{ github.event_name }}
           SEND_TEST: ${{ inputs.send_test || false }}
+          SEND_UPDATE: ${{ inputs.send_update || false }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          NOTIFICATION_TITLE: ${{ inputs.notification_title }}
+          NOTIFICATION_BODY: ${{ inputs.notification_body }}
           FIREBASE_PROJECT_ID: myfinc-4b36e
         run: |
           node <<'NODE'
@@ -73,29 +94,60 @@ jobs:
             });
 
             if (isManual) {
-              if (process.env.SEND_TEST !== 'true') {
-                console.log('FCM credentials are valid. No test message requested; existing notices were not resent.');
+              if (process.env.SEND_TEST === 'true') {
+                const title = 'MyFinc · Prueba de notificaciones';
+                const body = 'Firebase Cloud Messaging está conectado correctamente.';
+                const messageId = await getMessaging().send({
+                  topic: 'myfinc_announcements',
+                  notification: { title, body },
+                  data: {
+                    id: `fcm-test-${Date.now()}`,
+                    title,
+                    body,
+                    level: 'info',
+                    source: 'fcm_test',
+                  },
+                  android: {
+                    priority: 'high',
+                    notification: { channelId: 'myfinc_general_v2' },
+                  },
+                });
+                console.log(`Test notification sent to myfinc_announcements; FCM message id: ${messageId}`);
                 return;
               }
-              const messageId = await getMessaging().send({
-                topic: 'myfinc_announcements',
-                notification: {
-                  title: 'MyFinc · Prueba de notificaciones',
-                  body: 'Firebase Cloud Messaging está conectado correctamente.',
-                },
-                data: {
-                  id: `fcm-test-${Date.now()}`,
-                  title: 'MyFinc · Prueba de notificaciones',
-                  body: 'Firebase Cloud Messaging está conectado correctamente.',
-                  level: 'info',
-                  source: 'fcm_test',
-                },
-                android: {
-                  priority: 'high',
-                  notification: { channelId: 'myfinc_general_v2' },
-                },
-              });
-              console.log(`Test notification sent to myfinc_announcements; FCM message id: ${messageId}`);
+
+              if (process.env.SEND_UPDATE === 'true') {
+                const version = String(process.env.RELEASE_VERSION || '').trim();
+                if (!/^v?\\d+\\.\\d+\\.\\d+$/.test(version)) {
+                  throw new Error('Enter a valid version, for example 0.1.5.');
+                }
+                const normalizedVersion = version.startsWith('v') ? version : `v${version}`;
+                const title = String(process.env.NOTIFICATION_TITLE || `Nueva actualización de MyFinc ${normalizedVersion}`).trim().slice(0, 200);
+                const body = String(process.env.NOTIFICATION_BODY || `Ya está disponible MyFinc ${normalizedVersion}. Abre la aplicación para consultar los cambios y comprobar la actualización.`).trim().slice(0, 4000);
+                if (!title || !body) throw new Error('Notification title and message cannot be empty.');
+
+                const messageId = await getMessaging().send({
+                  topic: 'myfinc_announcements',
+                  notification: { title, body },
+                  data: {
+                    id: `release:${normalizedVersion}`,
+                    title,
+                    body,
+                    level: 'info',
+                    source: 'release',
+                    tag: normalizedVersion,
+                    url: `https://github.com/K3NYEL/myfinc/releases/tag/${normalizedVersion}`,
+                  },
+                  android: {
+                    priority: 'high',
+                    notification: { channelId: 'myfinc_general_v2' },
+                  },
+                });
+                console.log(`Release notification sent for ${normalizedVersion}; FCM message id: ${messageId}`);
+                return;
+              }
+
+              console.log('Firebase credentials are valid. Select send_test or send_update to send a message; no notification was sent.');
               return;
             }
 
