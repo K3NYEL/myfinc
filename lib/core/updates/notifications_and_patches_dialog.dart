@@ -47,7 +47,7 @@ class _NotificationsAndPatchesDialogState
     if (items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(bottom: 16),
-        child: Text('No hay notificaciones pendientes.'),
+        child: Text((isEnglish ? 'There are no pending notifications.' : 'No hay notificaciones pendientes.')),
       );
     }
     return Column(
@@ -75,7 +75,7 @@ class _NotificationsAndPatchesDialogState
                 child: Text('${item.message}\n${_dateLabel(item.receivedAt)}'),
               ),
               trailing: IconButton(
-                tooltip: 'Eliminar notificación',
+                tooltip: isEnglish ? 'Delete notification' : 'Eliminar notificación',
                 onPressed: () => _dismissNotification(item.id),
                 icon: const Icon(Icons.delete_outline_rounded),
               ),
@@ -92,7 +92,7 @@ class _NotificationsAndPatchesDialogState
       if (!mounted) return;
       if (update == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No hay una actualización instalada pendiente.')),
+          SnackBar(content: Text(isEnglish ? 'There is no pending installed update.' : 'No hay una actualización instalada pendiente.')),
         );
         return;
       }
@@ -110,7 +110,7 @@ class _NotificationsAndPatchesDialogState
   }
 
   String _dateLabel(DateTime? value) {
-    if (value == null) return 'Fecha no indicada';
+    if (value == null) return (isEnglish ? 'Date not provided' : 'Fecha no indicada');
     final date = value.toLocal();
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
@@ -119,6 +119,7 @@ class _NotificationsAndPatchesDialogState
 
   @override
   Widget build(BuildContext context) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     final screenSize = MediaQuery.sizeOf(context);
     final dialogWidth =
         (screenSize.width - 32).clamp(0.0, 520.0).toDouble();
@@ -127,7 +128,7 @@ class _NotificationsAndPatchesDialogState
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      title: const Text('Notificaciones y parches'),
+      title: Text(isEnglish ? 'Notifications and patches' : 'Notificaciones y parches'),
       content: SizedBox(
         width: dialogWidth,
         height: dialogHeight,
