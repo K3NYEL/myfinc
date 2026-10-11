@@ -23,6 +23,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/database/migrations/legacy_data_migration_service.dart';
 import '../../../finance/presentation/providers.dart';
 import '../../../finance/presentation/pages/currency_converter_page.dart';
+import '../../../finance/presentation/pages/finance_planning_page.dart';
 import '../../../../core/settings/app_preferences.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/update_dialog.dart';
@@ -1141,6 +1142,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const CurrencyConverterPage(),
+                ),
+              ),
+            ),
+            _SettingsTile(
+              icon: Icons.savings_outlined,
+              title: 'Presupuestos y metas de ahorro',
+              subtitle: 'Controla el límite mensual y el progreso de tus metas',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const FinancePlanningPage(),
                 ),
               ),
             ),
