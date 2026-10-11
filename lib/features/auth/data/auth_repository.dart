@@ -127,6 +127,30 @@ class AuthRepository {
 
   String _generateUserId() => 'usr_${_uuid.v4().replaceAll('-', '')}';
 
+  /// Ensure each local profile has a usable primary finance account.
+  /// Existing installations are repaired on the next successful login.
+  Future<void> _ensurePrimaryAccount(String userId) async {
+    final database = await _db;
+    final existing = await database.query(
+      'accounts',
+      columns: ['id'],
+      where: 'user_id = ? AND is_archived = 0',
+      whereArgs: [userId],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) return;
+
+    final now = DateTime.now().toIso8601String();
+    await database.insert('accounts', {
+      'user_id': userId,
+      'name': 'Mi cuenta',
+      'type': 'cash',
+      'initial_balance': 0,
+      'initial_balance_minor': 0,
+      'created_at': now,
+    });
+  }
+
   Future<AppUser> createUser({
     required String firstName,
     required String lastName,
@@ -177,6 +201,7 @@ class AuthRepository {
       'created_at': now,
       'last_login': now,
     });
+    await _ensurePrimaryAccount(userId);
 
     return AppUser(
       id: userId,
@@ -230,6 +255,8 @@ class AuthRepository {
         'Nombres, apellidos o contraseña incorrectos.',
       );
     }
+
+    await _ensurePrimaryAccount(user['id'] as String);
 
     final now = DateTime.now().toIso8601String();
     final updates = <String, Object?>{'last_login': now};
