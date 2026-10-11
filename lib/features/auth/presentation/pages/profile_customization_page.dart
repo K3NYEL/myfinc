@@ -84,9 +84,7 @@ class _ProfileCustomizationPageState
       await prefs.setInt(_key('color'), _selectedColor);
       await prefs.setInt(_key('avatar'), _selectedAvatar);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tu perfil se guardó en este dispositivo.')),
-      );
+      Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
