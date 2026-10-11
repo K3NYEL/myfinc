@@ -5,12 +5,17 @@ on:
     branches:
       - main
       - "security/**"
+      - "release/**"
   pull_request:
     branches:
       - main
 
 permissions:
   contents: read
+
+concurrency:
+  group: myfinc-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze-and-test:
