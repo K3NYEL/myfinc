@@ -9,7 +9,7 @@ final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
 
 class AppSettings {
   const AppSettings({
-    this.theme = ThemePreference.dark,
+    this.theme = ThemePreference.light,
     this.animationsEnabled = true,
   });
 
