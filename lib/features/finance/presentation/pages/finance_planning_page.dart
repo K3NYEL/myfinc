@@ -278,7 +278,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final limit = _budget == null ? null : (_budget!['limit_minor'] as num).toDouble() / 100;
-    final ratio = limit == null || limit <= 0 ? 0.0 : (_spentThisMonth / limit).clamp(0.0, 1.0);
+    final ratio = limit == null || limit <= 0 ? 0.0 : (_spentThisMonth / limit).clamp(0.0, 1.0).toDouble();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Presupuestos y metas'),
@@ -364,7 +364,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
     final theme = Theme.of(context);
     final target = (goal['target_minor'] as num).toDouble() / 100;
     final saved = (goal['saved_minor'] as num).toDouble() / 100;
-    final ratio = (saved / target).clamp(0.0, 1.0);
+    final ratio = (saved / target).clamp(0.0, 1.0).toDouble();
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
