@@ -25,7 +25,6 @@ import '../../../finance/presentation/providers.dart';
 import '../../../finance/presentation/pages/currency_converter_page.dart';
 import '../../../finance/presentation/pages/finance_planning_page.dart';
 import '../../../../core/settings/app_preferences.dart';
-import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/update_dialog.dart';
 import '../../../../shared/widgets/myfinc_logo.dart';
 
@@ -40,14 +39,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _checkingForUpdate = false;
   bool _dataOperationInProgress = false;
   String? _currentVersion;
-  String _currencyCode = 'DOP';
   String _autoBackupFrequency = 'disabled';
 
   @override
   void initState() {
     super.initState();
     _loadCurrentVersion();
-    _loadCurrency();
     _loadAutoBackupFrequency();
   }
 
@@ -242,57 +239,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await closeLoading();
       if (mounted) setState(() => _dataOperationInProgress = false);
     }
-  }
-
-  Future<void> _loadCurrency() async {
-    final currency = await AppPreferences.getCurrency();
-    if (!mounted) return;
-    setState(() => _currencyCode = currency);
-  }
-
-  Future<void> _showCurrencySelector() async {
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const ListTile(
-              title: Text('Moneda de visualización'),
-              subtitle: Text('Cambia el formato del importe. Para tasas reales, usa el conversor.'),
-            ),
-            RadioGroup<String>(
-              groupValue: _currencyCode,
-              onChanged: (value) => Navigator.pop(sheetContext, value),
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile<String>(
-                    value: 'DOP',
-                    title: Text('Peso dominicano'),
-                    subtitle: Text(r'RD$'),
-                  ),
-                  RadioListTile<String>(
-                    value: 'USD',
-                    title: Text('Dólar estadounidense'),
-                    subtitle: Text(r'USD$'),
-                  ),
-                  RadioListTile<String>(
-                    value: 'EUR',
-                    title: Text('Euro'),
-                    subtitle: Text('€'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (selected == null) return;
-    await AppPreferences.setCurrency(selected);
-    if (mounted) setState(() => _currencyCode = selected);
   }
 
   Future<void> _showCategoryManager() async {
@@ -1130,15 +1076,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Finanzas',
           children: [
             _SettingsTile(
-              icon: Icons.attach_money_rounded,
-              title: 'Moneda de visualización',
-              subtitle: currencyLabel(_currencyCode),
-              onTap: _showCurrencySelector,
-            ),
-            _SettingsTile(
               icon: Icons.currency_exchange_rounded,
-              title: 'Conversor de monedas',
-              subtitle: 'Consulta tasas de cambio y convierte entre más de 20 monedas',
+              title: 'Monedas y conversor',
+              subtitle: 'Convierte divisas y configura la moneda de visualización',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const CurrencyConverterPage(),
