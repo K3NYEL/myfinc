@@ -5,7 +5,7 @@ ThemeData buildAppTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   final primary = isDark ? AppColors.primary : const Color(0xFF0369A1);
   final background =
-      isDark ? AppColors.background : const Color(0xFFF1F5F9);
+      isDark ? AppColors.background : Colors.white;
   final surface = isDark ? AppColors.surface : Colors.white;
   final text = isDark ? AppColors.textPrimary : const Color(0xFF0F172A);
   final muted = isDark ? AppColors.textSecondary : const Color(0xFF475569);
