@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/currency_utils.dart';
+import 'currency_converter_page.dart';
 import '../../../../shared/widgets/async_state_view.dart';
 import '../../../../shared/widgets/movement_tile.dart';
 import '../../../../shared/widgets/myfinc_skeleton.dart';
@@ -80,6 +81,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    tooltip: 'Conversor de monedas',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const CurrencyConverterPage(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.currency_exchange_rounded),
                   ),
                   IconButton(
                     tooltip: 'Actualizar movimientos',
