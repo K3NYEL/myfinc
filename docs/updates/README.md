@@ -37,7 +37,7 @@ Add an object to `patches` only when a real patch/release exists:
 }
 ```
 
-The release URL must point to a MyFinc GitHub Release. `required` is informational metadata; do not mark a patch as required unless the app's update flow has been designed and verified to enforce it.
+The release URL must point to a MyFinc GitHub Release. Patches in this manifest are trusted release notes and links only; they must never contain executable code, shell commands, or instructions for the app to download and run arbitrary code. `required` is informational metadata; do not mark a patch as required unless the app's update flow has been designed and verified to enforce it.
 
 ## Manifest rules
 
