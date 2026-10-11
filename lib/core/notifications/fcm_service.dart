@@ -41,7 +41,12 @@ class FcmService {
     await NotificationPermissionService.requestPermission();
 
     final messaging = FirebaseMessaging.instance;
-    _token = await messaging.getToken();
+    try {
+      _token = await messaging.getToken();
+    } catch (error) {
+      // Token retrieval can fail temporarily; keep message listeners active.
+      debugPrint('MyFinc could not retrieve the FCM token: $error');
+    }
 
     _tokenRefreshSubscription ??= messaging.onTokenRefresh.listen((token) {
       _token = token;
