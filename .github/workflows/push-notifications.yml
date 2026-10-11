@@ -1,0 +1,141 @@
+name: MyFinc Push Notifications
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/updates/manifest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: myfinc-push-notifications
+  cancel-in-progress: false
+
+jobs:
+  send-new-notices:
+    name: Send newly published notices through FCM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Firebase Admin SDK
+        run: npm install --no-save firebase-admin
+
+      - name: Send new notices
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+          FIREBASE_PROJECT_ID: myfinc-4b36e
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const { execFileSync } = require('node:child_process');
+          const admin = require('firebase-admin');
+
+          async function main() {
+            const rawCredentials = process.env.FIREBASE_SERVICE_ACCOUNT;
+            if (!rawCredentials) {
+              throw new Error(
+                'Missing FIREBASE_SERVICE_ACCOUNT repository secret. Add the Firebase service-account JSON as a GitHub Actions secret.'
+              );
+            }
+
+            const credentials = JSON.parse(rawCredentials);
+            if (credentials.project_id !== process.env.FIREBASE_PROJECT_ID) {
+              throw new Error('The service account project_id does not match myfinc-4b36e.');
+            }
+
+            admin.initializeApp({
+              credential: admin.credential.cert(credentials),
+              projectId: process.env.FIREBASE_PROJECT_ID,
+            });
+
+            const current = JSON.parse(
+              fs.readFileSync('docs/updates/manifest.json', 'utf8')
+            );
+            const currentNotices = Array.isArray(current.notifications)
+              ? current.notifications
+              : [];
+
+            let previousIds = new Set();
+            const before = process.env.BEFORE_SHA;
+            const isPush = process.env.EVENT_NAME === 'push';
+            if (isPush && before && !/^0+$/.test(before)) {
+              try {
+                const previousText = execFileSync(
+                  'git',
+                  ['show', `${before}:docs/updates/manifest.json`],
+                  { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+                );
+                const previous = JSON.parse(previousText);
+                previousIds = new Set(
+                  (Array.isArray(previous.notifications) ? previous.notifications : [])
+                    .map((item) => item.id)
+                    .filter((id) => typeof id === 'string')
+                );
+              } catch {
+                console.log('Previous manifest unavailable; no historical notices will be resent.');
+                // Fail closed rather than broadcast every old notice.
+                return;
+              }
+            } else if (process.env.EVENT_NAME === 'workflow_dispatch') {
+              console.log('Manual run does not resend existing notices. Publish a new notice to trigger delivery.');
+              return;
+            }
+
+            const newNotices = currentNotices.filter((notice) =>
+              notice &&
+              typeof notice.id === 'string' &&
+              !previousIds.has(notice.id)
+            );
+
+            if (newNotices.length === 0) {
+              console.log('No newly added notices; nothing to send.');
+              return;
+            }
+
+            for (const notice of newNotices) {
+              const title = String(notice.title || 'MyFinc').trim().slice(0, 200);
+              const body = String(notice.message || '').trim().slice(0, 4000);
+              if (!title || !body) {
+                console.log(`Skipping notice ${notice.id}: title or message is empty.`);
+                continue;
+              }
+
+              const messageId = await admin.messaging().send({
+                topic: 'myfinc_announcements',
+                notification: { title, body },
+                data: {
+                  id: String(notice.id),
+                  title,
+                  body,
+                  level: String(notice.level || 'info'),
+                  source: 'notice',
+                },
+                android: {
+                  priority: 'high',
+                  notification: { channelId: 'myfinc_announcements' },
+                },
+              });
+              console.log(`Sent notice ${notice.id}; FCM message id: ${messageId}`);
+            }
+          }
+
+          main().catch((error) => {
+            console.error(error.message || error);
+            process.exitCode = 1;
+          });
+          NODE
