@@ -67,27 +67,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/',
-            builder: (_, __) => const DashboardPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const DashboardPage(),
+            ),
           ),
           GoRoute(
             path: '/statistics',
-            builder: (_, __) => const StatisticsPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const StatisticsPage(),
+            ),
           ),
           GoRoute(
             path: '/transactions',
-            builder: (_, __) => const TransactionsPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const TransactionsPage(),
+            ),
           ),
           GoRoute(
             path: '/accounts',
-            builder: (_, __) => const AccountsPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const AccountsPage(),
+            ),
           ),
           GoRoute(
             path: '/settings',
-            builder: (_, __) => const SettingsPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const SettingsPage(),
+            ),
           ),
           GoRoute(
             path: '/settings/cloud-account',
-            builder: (_, __) => const CloudAccountPage(),
+            pageBuilder: (_, state) => NoTransitionPage<void>(
+              key: state.pageKey,
+              child: const CloudAccountPage(),
+            ),
           ),
         ],
       ),
