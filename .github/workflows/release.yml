@@ -56,8 +56,8 @@ jobs:
           fi
 
           TAG_VERSION="${RELEASE_TAG#v}"
-          TAG_COMMIT_VERSION="$(git show "$TAG_SHA:pubspec.yaml" | sed -nE 's/^version:[[:space:]]*([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/p')"
-          MAIN_VERSION="$(git show origin/main:pubspec.yaml | sed -nE 's/^version:[[:space:]]*([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/p')"
+          TAG_COMMIT_VERSION="$(git show "$TAG_SHA:pubspec.yaml" | sed -nE 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
+          MAIN_VERSION="$(git show origin/main:pubspec.yaml | sed -nE 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
 
           # A release tag may predate a version correction. Use main only when its
           # pubspec version exactly matches the selected tag; otherwise fail closed.
