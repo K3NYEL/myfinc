@@ -1,0 +1,81 @@
+name: Notify MyFinc update
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: myfinc-release-notification-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    name: Send update notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release event
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+          RELEASE_DRAFT: ${{ github.event.release.draft }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Not a version release; skipping."; exit 1; }
+          [[ "$RELEASE_PRERELEASE" == "false" && "$RELEASE_DRAFT" == "false" ]] || { echo "Drafts and prereleases are not notified."; exit 1; }
+
+      - name: Authenticate to Firebase
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          token_format: access_token
+
+      - name: Send notification to MyFinc installations
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          PROJECT_ID: myfinc-4b36e
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="${RELEASE_NAME:-Actualización de MyFinc ${RELEASE_TAG}}"
+          BODY="$(printf '%s' "${RELEASE_BODY:-Ya está disponible una nueva versión de MyFinc.}" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*$/d' | head -n 4 | tr '\n' ' ' | cut -c1-220)"
+          BODY="${BODY:-Ya está disponible una nueva versión de MyFinc. Abre la app para ver los cambios.}"
+
+          jq -n \
+            --arg title "$TITLE" \
+            --arg body "$BODY" \
+            --arg tag "$RELEASE_TAG" \
+            --arg url "$RELEASE_URL" \
+            '{
+              message: {
+                topic: "myfinc_announcements",
+                notification: {title: $title, body: $body},
+                data: {
+                  id: ("release:" + $tag),
+                  title: $title,
+                  body: $body,
+                  level: "info",
+                  source: "release",
+                  tag: $tag,
+                  url: $url
+                },
+                android: {
+                  priority: "high",
+                  notification: {channel_id: "myfinc_general_v2"}
+                }
+              }
+            }' > /tmp/myfinc-fcm-message.json
+
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "Content-Type: application/json; charset=UTF-8" \
+            --data-binary @/tmp/myfinc-fcm-message.json \
+            "https://fcm.googleapis.com/v1/projects/$PROJECT_ID/messages:send"
