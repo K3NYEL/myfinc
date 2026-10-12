@@ -326,7 +326,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Nombres', 'First name'),
-                        hintText: 'Escribe tus nombres',
+                        hintText: _tr(context, 'Escribe tus nombres', 'Enter your first name'),
                         prefixIcon: Icon(Icons.person_outline),
                         border: OutlineInputBorder(),
                       ),
@@ -337,7 +337,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Apellidos', 'Last name'),
-                        hintText: 'Escribe tus apellidos',
+                        hintText: _tr(context, 'Escribe tus apellidos', 'Enter your last name'),
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
                       ),
