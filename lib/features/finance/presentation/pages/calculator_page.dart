@@ -114,18 +114,23 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
     switch (key) {
       case 'AC':
         _clear();
+        break;
       case '⌫':
         _backspace();
+        break;
       case '=':
         _calculate();
+        break;
       case '+':
       case '−':
       case '×':
       case '÷':
       case '%':
         _chooseOperator(key);
+        break;
       default:
         _input(key);
+        break;
     }
   }
 
