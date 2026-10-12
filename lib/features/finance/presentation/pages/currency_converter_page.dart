@@ -95,7 +95,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
       if (!refreshed && convertDisplayAmount(1, from: 'DOP', to: code) == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(_tr(context, 'No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.', 'No exchange rates are available. Connect to the internet and try again.')),
             behavior: SnackBarBehavior.floating,
           ),
