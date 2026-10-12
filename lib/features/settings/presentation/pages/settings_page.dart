@@ -27,6 +27,9 @@ import '../../../../core/settings/app_preferences.dart';
 import '../../../../shared/widgets/update_dialog.dart';
 import '../../../../shared/widgets/myfinc_logo.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
@@ -86,7 +89,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final selected = await showDialog<String>(
       context: context,
       builder: (dialogContext) => SimpleDialog(
-        title: const Text('Copia automática'),
+        title: Text(_tr(context, 'Copia automática', 'Automatic backup')),
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
@@ -117,7 +120,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (!mounted) return;
     setState(() => _autoBackupFrequency = selected);
     await _showUpdateMessage(
-      title: 'Copia automática actualizada',
+      title: _tr(context, 'Copia automática actualizada', 'Automatic backup updated'),
       message: selected == 'disabled'
           ? 'La creación automática de copias quedó desactivada.'
           : 'MyFinc intentará crear una copia cada ${selected == 'daily' ? '24 horas' : '7 días'} al iniciar sesión. Si no se puede guardar, el inicio de sesión seguirá funcionando y se volverá a intentar en el siguiente inicio.',
@@ -130,8 +133,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(sessionProvider);
     if (user == null) {
       await _showUpdateMessage(
-        title: 'Inicia sesión',
-        message: 'Debes iniciar sesión para eliminar tus datos financieros.',
+        title: _tr(context, 'Inicia sesión', 'Sign in'),
+        message: _tr(context, 'Debes iniciar sesión para eliminar tus datos financieros.', 'You must sign in to delete your financial data.'),
         icon: Icons.lock_outline_rounded,
       );
       return;
@@ -158,16 +161,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   controller: controller,
                   autofocus: true,
                   onChanged: (_) => setDialogState(() {}),
-                  decoration: const InputDecoration(labelText: 'Confirmación', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: _tr(context, 'Confirmación', 'Confirmation'), border: OutlineInputBorder()),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancelar')),
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(_tr(context, 'Cancelar', 'Cancel'))),
             FilledButton(
               onPressed: controller.text == 'ELIMINAR MIS DATOS' ? () => Navigator.pop(dialogContext, true) : null,
-              child: const Text('Crear copia y eliminar'),
+              child: Text(_tr(context, 'Crear copia y eliminar', 'Back up and delete')),
             ),
           ],
         ),
@@ -191,8 +194,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const _OperationLoadingDialog(
-          title: 'Protegiendo tus datos',
-          message: 'Creando una copia preventiva antes de eliminar…',
+          title: _tr(context, 'Protegiendo tus datos', 'Protecting your data'),
+          message: _tr(context, 'Creando una copia preventiva antes de eliminar…', 'Creating a safety backup before deletion…'),
         ),
       );
       loadingOpen = true;
@@ -206,8 +209,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const _OperationLoadingDialog(
-          title: 'Eliminando datos financieros',
-          message: 'Eliminando únicamente los registros de esta cuenta…',
+          title: _tr(context, 'Eliminando datos financieros', 'Deleting financial data'),
+          message: _tr(context, 'Eliminando únicamente los registros de esta cuenta…', 'Deleting records for this account only…'),
         ),
       );
       loadingOpen = true;
@@ -222,7 +225,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ref.invalidate(categoriesProvider('expense'));
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'Datos eliminados',
+        title: _tr(context, 'Datos eliminados', 'Data deleted'),
         message: 'Se eliminaron ${deleted['accounts']} cuentas, ${deleted['transactions']} movimientos y ${deleted['transfers']} transferencias. La copia preventiva está guardada como ${p.basename(safetyFile.path)}.',
         icon: Icons.check_circle_outline_rounded,
       );
@@ -230,7 +233,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await closeLoading();
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudieron eliminar los datos',
+        title: _tr(context, 'No se pudieron eliminar los datos', 'Could not delete data'),
         message: error is AppException ? error.message : 'No se completó la eliminación. Si falló la copia preventiva, tus datos no se eliminaron.',
         icon: Icons.error_outline_rounded,
       );
@@ -263,8 +266,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         await showUpdateDialog(context, update);
       } else {
         await _showUpdateMessage(
-          title: 'MyFinc está actualizada',
-          message: 'No hay una versión nueva disponible para este dispositivo.',
+          title: _tr(context, 'MyFinc está actualizada', 'MyFinc is up to date'),
+          message: _tr(context, 'No hay una versión nueva disponible para este dispositivo.', 'No new version is available for this device.'),
           icon: Icons.check_circle_outline_rounded,
         );
       }
@@ -272,7 +275,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
 
       await _showUpdateMessage(
-        title: 'No se pudo comprobar',
+        title: _tr(context, 'No se pudo comprobar', 'Could not check for updates'),
         message: e.message,
         icon: Icons.cloud_off_outlined,
       );
@@ -280,8 +283,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
 
       await _showUpdateMessage(
-        title: 'No se pudo comprobar',
-        message: 'Ocurrió un error inesperado al comprobar actualizaciones.',
+        title: _tr(context, 'No se pudo comprobar', 'Could not check for updates'),
+        message: _tr(context, 'Ocurrió un error inesperado al comprobar actualizaciones.', 'An unexpected error occurred while checking for updates.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -318,7 +321,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           actions: [
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Aceptar'),
+              child: Text(_tr(context, 'Aceptar', 'OK')),
             ),
           ],
         );
@@ -360,8 +363,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(sessionProvider);
     if (user == null) {
       await _showUpdateMessage(
-        title: 'Inicia sesión',
-        message: 'Debes iniciar sesión para crear una copia de tus datos.',
+        title: _tr(context, 'Inicia sesión', 'Sign in'),
+        message: _tr(context, 'Debes iniciar sesión para crear una copia de tus datos.', 'You must sign in to back up your data.'),
         icon: Icons.lock_outline_rounded,
       );
       return;
@@ -374,8 +377,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const _OperationLoadingDialog(
-          title: 'Creando copia de seguridad',
-          message: 'Preparando tus datos y guardando el archivo localmente…',
+          title: _tr(context, 'Creando copia de seguridad', 'Creating backup'),
+          message: _tr(context, 'Preparando tus datos y guardando el archivo localmente…', 'Preparing your data and saving the file locally…'),
         ),
       );
       loadingOpen = true;
@@ -387,7 +390,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       loadingOpen = false;
       await loadingRoute;
       await _showUpdateMessage(
-        title: 'Copia guardada',
+        title: _tr(context, 'Copia guardada', 'Backup saved'),
         message: 'La copia se guardó localmente.\n\nRuta:\n${file.path}\n\nImportante: el archivo JSON no está cifrado y contiene datos financieros legibles. Guárdalo en un lugar privado. No contiene contraseñas ni hashes de acceso.',
         icon: Icons.check_circle_outline_rounded,
       );
@@ -399,7 +402,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         if (loadingRoute != null) await loadingRoute;
       }
       await _showUpdateMessage(
-        title: 'No se pudo crear la copia',
+        title: _tr(context, 'No se pudo crear la copia', 'Could not create backup'),
         message: error is AppException ? error.message : 'Ocurrió un error al generar o guardar la copia de seguridad.',
         icon: Icons.error_outline_rounded,
       );
@@ -481,11 +484,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           TextButton(
             onPressed: () =>
                 Navigator.of(dialogContext).pop('__external__'),
-            child: const Text('Buscar otro archivo…'),
+            child: Text(_tr(context, 'Buscar otro archivo…', 'Choose another file…')),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
+            child: Text(_tr(context, 'Cancelar', 'Cancel')),
           ),
         ],
       ),
@@ -497,8 +500,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(sessionProvider);
     if (user == null) {
       await _showUpdateMessage(
-        title: 'Inicia sesión',
-        message: 'Debes iniciar sesión para restaurar una copia.',
+        title: _tr(context, 'Inicia sesión', 'Sign in'),
+        message: _tr(context, 'Debes iniciar sesión para restaurar una copia.', 'You must sign in to restore a backup.'),
         icon: Icons.lock_outline_rounded,
       );
       return;
@@ -545,7 +548,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Restaurar copia de seguridad'),
+          title: Text(_tr(context, 'Restaurar copia de seguridad', 'Restore backup')),
           content: Text(
             'Se importarán los datos de "$fileName" a la cuenta actual. '
             'Los datos existentes no se borrarán; las cuentas y movimientos '
@@ -556,11 +559,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(_tr(context, 'Cancelar', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Restaurar'),
+              child: Text(_tr(context, 'Restaurar', 'Restore')),
             ),
           ],
         ),
@@ -571,8 +574,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const _OperationLoadingDialog(
-          title: 'Restaurando copia de seguridad',
-          message: 'Validando e importando los datos. No cierres MyFinc…',
+          title: _tr(context, 'Restaurando copia de seguridad', 'Restoring backup'),
+          message: _tr(context, 'Validando e importando los datos. No cierres MyFinc…', 'Validating and importing data. Do not close MyFinc…'),
         ),
       );
       restoreLoadingOpen = true;
@@ -596,7 +599,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'Restauración completada',
+        title: _tr(context, 'Restauración completada', 'Restore completed'),
         message: 'Se importaron ${counts['accounts']} cuentas, '
             '${counts['transactions']} movimientos y '
             '${counts['transfers']} transferencias. '
@@ -608,7 +611,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await closeRestoreLoading();
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudo restaurar',
+        title: _tr(context, 'No se pudo restaurar', 'Could not restore backup'),
         message: error.message,
         icon: Icons.error_outline_rounded,
       );
@@ -616,16 +619,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await closeRestoreLoading();
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'Archivo no válido',
-        message: 'El archivo no contiene texto UTF-8 válido.',
+        title: _tr(context, 'Archivo no válido', 'Invalid file'),
+        message: _tr(context, 'El archivo no contiene texto UTF-8 válido.', 'The file does not contain valid UTF-8 text.'),
         icon: Icons.error_outline_rounded,
       );
     } catch (_) {
       await closeRestoreLoading();
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudo restaurar',
-        message: 'Ocurrió un error. No se completó la importación.',
+        title: _tr(context, 'No se pudo restaurar', 'Could not restore backup'),
+        message: _tr(context, 'Ocurrió un error. No se completó la importación.', 'An error occurred. The import was not completed.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -639,7 +642,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final remoteSession = ref.read(remoteAuthSessionProvider);
     if (remoteSession == null) {
       await _showUpdateMessage(
-        title: 'Inicia sesión en la nube',
+        title: _tr(context, 'Inicia sesión en la nube', 'Sign in to the cloud'),
         message: 'Para migrar una copia, activa la cuenta en la nube desde el '
             'inicio de sesión. Tus datos locales no se enviarán hasta que '
             'selecciones una copia y confirmes la importación.',
@@ -676,7 +679,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       if (preview.alreadyImported) {
         await _showUpdateMessage(
-          title: 'Copia ya importada',
+          title: _tr(context, 'Copia ya importada', 'Backup already imported'),
           message: 'Esta copia ya fue importada en la cuenta en la nube. '
               'No se enviaron registros nuevos.',
           icon: Icons.info_outline_rounded,
@@ -723,7 +726,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(_tr(context, 'Cancelar', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -748,7 +751,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           counts is Map ? counts['transactions'] : null;
       final importedTransfers = counts is Map ? counts['transfers'] : null;
       await _showUpdateMessage(
-        title: 'Migración completada',
+        title: _tr(context, 'Migración completada', 'Migration completed'),
         message: 'La API confirmó la importación de '
             '${importedAccounts ?? preview.accounts} cuentas, '
             '${importedTransactions ?? preview.transactions} movimientos y '
@@ -759,29 +762,29 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } on MyFincApiException catch (error) {
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudo migrar la copia',
+        title: _tr(context, 'No se pudo migrar la copia', 'Could not migrate backup'),
         message: error.message,
         icon: Icons.cloud_off_outlined,
       );
     } on AppException catch (error) {
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudo leer la copia',
+        title: _tr(context, 'No se pudo leer la copia', 'Could not read backup'),
         message: error.message,
         icon: Icons.error_outline_rounded,
       );
     } on FormatException {
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'Archivo no válido',
-        message: 'El archivo no contiene texto UTF-8 válido.',
+        title: _tr(context, 'Archivo no válido', 'Invalid file'),
+        message: _tr(context, 'El archivo no contiene texto UTF-8 válido.', 'The file does not contain valid UTF-8 text.'),
         icon: Icons.error_outline_rounded,
       );
     } catch (_) {
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudo migrar la copia',
-        message: 'Ocurrió un error inesperado. No se confirmó la importación.',
+        title: _tr(context, 'No se pudo migrar la copia', 'Could not migrate backup'),
+        message: _tr(context, 'Ocurrió un error inesperado. No se confirmó la importación.', 'An unexpected error occurred. The import was not confirmed.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -791,7 +794,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _showSyncInfo() async {
     await _showUpdateMessage(
-      title: 'Sincronización en la nube',
+      title: _tr(context, 'Sincronización en la nube', 'Cloud sync'),
       message: 'La sincronización todavía no está disponible porque MyFinc '
           'no tiene un backend de sincronización configurado. Tus datos '
           'siguen guardándose localmente. Mientras tanto, usa Copia de '
@@ -805,8 +808,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.read(sessionProvider);
     if (user == null) {
       await _showUpdateMessage(
-        title: 'Inicia sesión',
-        message: 'Debes iniciar sesión para recuperar datos antiguos.',
+        title: _tr(context, 'Inicia sesión', 'Sign in'),
+        message: _tr(context, 'Debes iniciar sesión para recuperar datos antiguos.', 'You must sign in to recover older data.'),
         icon: Icons.lock_outline_rounded,
       );
       return;
@@ -837,7 +840,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       if (total == 0) {
         await _showUpdateMessage(
-          title: 'No hay datos pendientes',
+          title: _tr(context, 'No hay datos pendientes', 'No pending data'),
           message: 'No se encontraron cuentas, movimientos ni transferencias '
               'antiguas pendientes de recuperar.',
           icon: Icons.check_circle_outline_rounded,
@@ -851,7 +854,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         builder: (dialogContext) => StatefulBuilder(
           builder: (dialogContext, setDialogState) => AlertDialog(
-            title: const Text('Recuperar datos antiguos'),
+            title: Text(_tr(context, 'Recuperar datos antiguos', 'Recover older data')),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -893,7 +896,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     autofocus: true,
                     onChanged: (_) => setDialogState(() {}),
                     decoration: const InputDecoration(
-                      labelText: 'Confirmación',
+                      labelText: _tr(context, 'Confirmación', 'Confirmation'),
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -903,7 +906,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancelar'),
+                child: Text(_tr(context, 'Cancelar', 'Cancel')),
               ),
               FilledButton(
                 onPressed: controller.text ==
@@ -923,8 +926,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) => const _OperationLoadingDialog(
-          title: 'Recuperando datos antiguos',
-          message: 'Comprobando relaciones y asignando registros…',
+          title: _tr(context, 'Recuperando datos antiguos', 'Recovering older data'),
+          message: _tr(context, 'Comprobando relaciones y asignando registros…', 'Checking relationships and assigning records…'),
         ),
       );
       loadingOpen = true;
@@ -942,7 +945,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'Revisión completada',
+        title: _tr(context, 'Revisión completada', 'Review completed'),
         message: 'MyFinc procesó los datos antiguos. Si quedaron registros '
             'en conflicto, permanecerán sin asignar para proteger la '
             'privacidad de las cuentas.',
@@ -952,7 +955,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await closeLoading();
       if (!mounted) return;
       await _showUpdateMessage(
-        title: 'No se pudieron recuperar los datos',
+        title: _tr(context, 'No se pudieron recuperar los datos', 'Could not recover data'),
         message: error is AppException
             ? error.message
             : 'Ocurrió un error inesperado. No se confirmó la recuperación.',
@@ -970,7 +973,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Cerrar sesión'),
+          title: Text(_tr(context, 'Cerrar sesión', 'Sign out')),
           content: const Text(
             '¿Seguro que quieres cerrar tu sesión? '
             'Tus datos permanecerán guardados en este dispositivo.',
@@ -978,11 +981,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(_tr(context, 'Cancelar', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Cerrar sesión'),
+              child: Text(_tr(context, 'Cerrar sesión', 'Sign out')),
             ),
           ],
         );
@@ -1009,7 +1012,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             IconButton(
-              tooltip: 'Volver',
+              tooltip: _tr(context, 'Volver', 'Back'),
               onPressed: () {
                 if (context.canPop()) {
                   context.pop();
@@ -1081,8 +1084,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 value: settings.languageCode,
                 underline: const SizedBox.shrink(),
                 items: const [
-                  DropdownMenuItem(value: 'es', child: Text('Español')),
-                  DropdownMenuItem(value: 'en', child: Text('English')),
+                  DropdownMenuItem(value: 'es', child: Text(_tr(context, 'Español', 'Spanish'))),
+                  DropdownMenuItem(value: 'en', child: Text(_tr(context, 'English', 'English'))),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -1140,8 +1143,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.logout_rounded,
-              title: 'Cerrar sesión',
-              subtitle: 'Salir de tu cuenta en este dispositivo',
+              title: _tr(context, 'Cerrar sesión', 'Sign out'),
+              subtitle: _tr(context, 'Salir de tu cuenta en este dispositivo', 'Sign out on this device'),
               onTap: _logout,
             ),
           ],
@@ -1151,11 +1154,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // DATOS
         // =========================
         _SettingsSection(
-          title: 'Datos',
+          title: _tr(context, 'Datos', 'Data'),
           children: [
             _SettingsTile(
               icon: Icons.backup_outlined,
-              title: 'Copia de seguridad',
+              title: _tr(context, 'Copia de seguridad', 'Backup'),
               subtitle: _dataOperationInProgress
                   ? 'Preparando operación...'
                   : 'Exportar cuentas y movimientos a un archivo JSON',
@@ -1163,7 +1166,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.restore_outlined,
-              title: 'Restaurar datos',
+              title: _tr(context, 'Restaurar datos', 'Restore data'),
               subtitle: _dataOperationInProgress
                   ? 'Preparando operación...'
                   : 'Importar una copia JSON sin borrar los datos actuales',
@@ -1171,7 +1174,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.cloud_upload_outlined,
-              title: 'Migrar copia a la nube',
+              title: _tr(context, 'Migrar copia a la nube', 'Migrate backup to cloud'),
               subtitle: _dataOperationInProgress
                   ? 'Preparando operación...'
                   : ref.watch(remoteAuthSessionProvider) == null
@@ -1181,7 +1184,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.history_rounded,
-              title: 'Recuperar datos antiguos',
+              title: _tr(context, 'Recuperar datos antiguos', 'Recover older data'),
               subtitle: _dataOperationInProgress
                   ? 'Preparando operación...'
                   : 'Revisar y recuperar datos sin propietario asignado',
@@ -1189,13 +1192,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.backup_table_outlined,
-              title: 'Copia automática',
+              title: _tr(context, 'Copia automática', 'Automatic backup'),
               subtitle: _autoBackupLabel(_autoBackupFrequency),
               onTap: _dataOperationInProgress ? null : _configureAutoBackup,
             ),
             _SettingsTile(
               icon: Icons.delete_forever_outlined,
-              title: 'Eliminar todos los datos',
+              title: _tr(context, 'Eliminar todos los datos', 'Delete all data'),
               subtitle: _dataOperationInProgress
                   ? 'Operación en curso…'
                   : 'Borrar los datos financieros de esta cuenta tras crear una copia',
@@ -1203,8 +1206,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.sync_outlined,
-              title: 'Sincronización',
-              subtitle: 'No disponible: falta configurar el servidor',
+              title: _tr(context, 'Sincronización', 'Synchronization'),
+              subtitle: _tr(context, 'No disponible: falta configurar el servidor', 'Unavailable: server setup is required'),
               onTap: _showSyncInfo,
             ),
           ],
@@ -1223,8 +1226,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () async {
                 if (!NotificationPermissionService.isAndroid) {
                   await _showUpdateMessage(
-                    title: 'Permiso no disponible',
-                    message: 'La gestión de permisos de notificación del sistema está disponible en Android.',
+                    title: _tr(context, 'Permiso no disponible', 'Permission unavailable'),
+                    message: _tr(context, 'La gestión de permisos de notificación del sistema está disponible en Android.', 'System notification permissions can be managed on Android.'),
                     icon: Icons.info_outline_rounded,
                   );
                   return;
@@ -1235,7 +1238,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   await NotificationPermissionService.openSettings();
                 } else {
                   await _showUpdateMessage(
-                    title: 'Notificaciones permitidas',
+                    title: _tr(context, 'Notificaciones permitidas', 'Notifications allowed'),
                     message: 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.',
                     icon: Icons.check_circle_outline_rounded,
                   );
@@ -1276,8 +1279,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             _SettingsTile(
               icon: Icons.auto_graph_rounded,
-              title: 'Acerca de MyFinc',
-              subtitle: 'Información sobre la aplicación',
+              title: _tr(context, 'Acerca de MyFinc', 'About MyFinc'),
+              subtitle: _tr(context, 'Información sobre la aplicación', 'App information'),
               onTap: () async {
                 final packageInfo = await PackageInfo.fromPlatform();
                 if (!context.mounted) return;
@@ -1355,8 +1358,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.description_outlined,
-              title: 'Licencias',
-              subtitle: 'Licencias de código abierto',
+              title: _tr(context, 'Licencias', 'Licenses'),
+              subtitle: _tr(context, 'Licencias de código abierto', 'Open-source licenses'),
               onTap: () async {
                 final packageInfo = await PackageInfo.fromPlatform();
 
@@ -1419,8 +1422,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _ThemeOption(
                 value: ThemePreference.system,
                 current: current,
-                title: 'Sistema',
-                subtitle: 'Usar la configuración de apariencia del dispositivo',
+                title: _tr(context, 'Sistema', 'System'),
+                subtitle: _tr(context, 'Usar la configuración de apariencia del dispositivo', 'Use device appearance settings'),
                 onSelected: (value) {
                   Navigator.pop(context, value);
                 },
@@ -1428,8 +1431,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _ThemeOption(
                 value: ThemePreference.light,
                 current: current,
-                title: 'Claro',
-                subtitle: 'Usar siempre el tema claro',
+                title: _tr(context, 'Claro', 'Light'),
+                subtitle: _tr(context, 'Usar siempre el tema claro', 'Always use the light theme'),
                 onSelected: (value) {
                   Navigator.pop(context, value);
                 },
@@ -1437,8 +1440,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _ThemeOption(
                 value: ThemePreference.dark,
                 current: current,
-                title: 'Oscuro',
-                subtitle: 'Usar siempre el tema oscuro',
+                title: _tr(context, 'Oscuro', 'Dark'),
+                subtitle: _tr(context, 'Usar siempre el tema oscuro', 'Always use the dark theme'),
                 onSelected: (value) {
                   Navigator.pop(context, value);
                 },
@@ -1525,8 +1528,8 @@ class _CategoryManagerDialogState
           maxLength: 40,
           textCapitalization: TextCapitalization.sentences,
           decoration: const InputDecoration(
-            labelText: 'Nombre',
-            hintText: 'Ej. Salario o Transporte',
+            labelText: _tr(context, 'Nombre', 'Name'),
+            hintText: _tr(context, 'Ej. Salario o Transporte', 'e.g. Salary or Transport'),
             border: OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.pop(dialogContext, value.trim()),
@@ -1534,7 +1537,7 @@ class _CategoryManagerDialogState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
+            child: Text(_tr(context, 'Cancelar', 'Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
@@ -1570,7 +1573,7 @@ class _CategoryManagerDialogState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancelar'),
+            child: Text(_tr(context, 'Cancelar', 'Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
@@ -1640,7 +1643,7 @@ class _CategoryManagerDialogState
                               dense: true,
                               title: Text(category.name),
                               trailing: IconButton(
-                                tooltip: 'Eliminar categoría personalizada',
+                                tooltip: _tr(context, 'Eliminar categoría personalizada', 'Delete custom category'),
                                 onPressed: _busy ? null : () => _deleteCategory(category.id, category.name),
                                 icon: const Icon(Icons.delete_outline_rounded),
                               ),
