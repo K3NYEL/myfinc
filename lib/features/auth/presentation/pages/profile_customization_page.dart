@@ -167,8 +167,8 @@ class _ProfileCustomizationPageState
               maxLength: 50,
               textCapitalization: TextCapitalization.words,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'Nombre visible',
+              decoration: InputDecoration(
+                labelText: isEnglish ? 'Display name' : 'Nombre visible',
                 hintText: isEnglish ? 'What should we call you?' : '¿Cómo quieres que te llamen?',
                 prefixIcon: Icon(Icons.badge_outlined),
                 border: OutlineInputBorder(),
@@ -182,15 +182,15 @@ class _ProfileCustomizationPageState
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: isEnglish ? 'Bio (optional)' : 'Descripción (opcional)',
-                hintText: 'Una frase sobre ti',
+                hintText: isEnglish ? 'A short sentence about you' : 'Una frase sobre ti',
                 prefixIcon: Icon(Icons.short_text_rounded),
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            Text('Avatar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(isEnglish ? 'Avatar' : 'Avatar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -205,7 +205,7 @@ class _ProfileCustomizationPageState
               ],
             ),
             const SizedBox(height: 20),
-            Text('Color del perfil', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(isEnglish ? 'Profile color' : 'Color del perfil', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
