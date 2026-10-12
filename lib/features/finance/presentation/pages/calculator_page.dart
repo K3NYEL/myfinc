@@ -96,7 +96,7 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
   }
 
   void _showError() {
-    _expression = _isEnglish ? 'Cannot divide by zero' : 'No se puede dividir entre cero';
+    _expression = ref.read(settingsProvider).languageCode == 'en' ? 'Cannot divide by zero' : 'No se puede dividir entre cero';
     _display = 'Error';
     _firstOperand = null;
     _operator = null;
