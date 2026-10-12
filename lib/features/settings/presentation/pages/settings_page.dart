@@ -145,17 +145,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
-          title: const Text('Eliminar todos los datos financieros'),
+          title: Text(_tr(context, 'Eliminar todos los datos financieros', 'Delete all financial data')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Esta acción eliminará de esta cuenta todas las cuentas financieras, movimientos, transferencias y categorías personalizadas. No elimina tu cuenta de acceso ni los datos de otras cuentas.'),
+                Text(_tr(context, 'Esta acción eliminará de esta cuenta todas las cuentas financieras, movimientos, transferencias y categorías personalizadas. No elimina tu cuenta de acceso ni los datos de otras cuentas.', 'This action deletes all financial accounts, transactions, transfers, and custom categories from this account. It does not delete your sign-in account or data belonging to other accounts.')),
                 const SizedBox(height: 12),
-                const Text('Antes de continuar, MyFinc guardará una copia de seguridad. Si no puede crearla, no eliminará nada.'),
+                Text(_tr(context, 'Antes de continuar, MyFinc guardará una copia de seguridad. Si no puede crearla, no eliminará nada.', 'Before continuing, MyFinc will create a backup. If it cannot create one, nothing will be deleted.')),
                 const SizedBox(height: 12),
-                Text('Para confirmar, escribe exactamente: ELIMINAR MIS DATOS', style: TextStyle(color: Theme.of(dialogContext).colorScheme.error, fontWeight: FontWeight.w700)),
+                Text(_tr(context, 'Para confirmar, escribe exactamente: ELIMINAR MIS DATOS', 'To confirm, type exactly: DELETE MY DATA'), style: TextStyle(color: Theme.of(dialogContext).colorScheme.error, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: controller,
@@ -443,7 +443,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Restaurar copia'),
+        title: Text(_tr(context, 'Restaurar copia', 'Restore backup')),
         content: SizedBox(
           width: 460,
           child: backups.isEmpty
@@ -472,7 +472,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: Text('Última modificación: $date'),
+                        subtitle: Text(_tr(context, 'Última modificación: $date', 'Last modified: $date')),
                         onTap: () =>
                             Navigator.of(dialogContext).pop(backup.path),
                       );
@@ -690,20 +690,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Revisar migración a la nube'),
+          title: Text(_tr(context, 'Revisar migración a la nube', 'Review cloud migration')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Archivo: ${file.name}'),
+                Text(_tr(context, 'Archivo: ${file.name}', 'File: ${file.name}')),
                 const SizedBox(height: 12),
-                Text('Cuentas: ${preview.accounts}'),
-                Text('Categorías: ${preview.categories}'),
-                Text('Movimientos: ${preview.transactions}'),
-                Text('Transferencias: ${preview.transfers}'),
+                Text(_tr(context, 'Cuentas: ${preview.accounts}', 'Accounts: ${preview.accounts}')),
+                Text(_tr(context, 'Categorías: ${preview.categories}', 'Categories: ${preview.categories}')),
+                Text(_tr(context, 'Movimientos: ${preview.transactions}', 'Transactions: ${preview.transactions}')),
+                Text(_tr(context, 'Transferencias: ${preview.transfers}', 'Transfers: ${preview.transfers}')),
                 const SizedBox(height: 12),
-                Text('Moneda asignada: ${preview.currencyCode}'),
+                Text(_tr(context, 'Moneda asignada: ${preview.currencyCode}', 'Assigned currency: ${preview.currencyCode}')),
                 const SizedBox(height: 12),
                 const Text(
                   'Al confirmar, estos datos financieros se enviarán por '
@@ -730,7 +730,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Confirmar migración'),
+              child: Text(_tr(context, 'Confirmar migración', 'Confirm migration')),
             ),
           ],
         ),
@@ -913,7 +913,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         LegacyDataMigrationService.confirmationPhrase
                     ? () => Navigator.of(dialogContext).pop(true)
                     : null,
-                child: const Text('Recuperar datos'),
+                child: Text(_tr(context, 'Recuperar datos', 'Recover data')),
               ),
             ],
           ),
@@ -1349,7 +1349,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('Cerrar'),
+                        child: Text(_tr(context, 'Cerrar', 'Close')),
                       ),
                     ],
                   ),
@@ -1541,7 +1541,7 @@ class _CategoryManagerDialogState
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
-            child: const Text('Agregar'),
+            child: Text(_tr(context, 'Agregar', 'Add')),
           ),
         ],
       ),
@@ -1568,8 +1568,8 @@ class _CategoryManagerDialogState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Eliminar categoría'),
-        content: Text('¿Quieres eliminar "$name"? Las categorías predeterminadas están protegidas y no se pueden eliminar.'),
+        title: Text(_tr(context, 'Eliminar categoría', 'Delete category')),
+        content: Text(_tr(context, '¿Quieres eliminar "$name"? Las categorías predeterminadas están protegidas y no se pueden eliminar.', 'Delete "$name"? Default categories are protected and cannot be deleted.')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -1603,7 +1603,7 @@ class _CategoryManagerDialogState
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider(_type));
     return AlertDialog(
-      title: const Text('Categorías financieras'),
+      title: Text(_tr(context, 'Categorías financieras', 'Financial categories')),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -1611,8 +1611,8 @@ class _CategoryManagerDialogState
           children: [
             SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'expense', label: Text('Gastos'), icon: Icon(Icons.south_west_rounded)),
-                ButtonSegment(value: 'income', label: Text('Ingresos'), icon: Icon(Icons.north_east_rounded)),
+                ButtonSegment(value: 'expense', label: Text(_tr(context, 'Gastos', 'Expenses')), icon: Icon(Icons.south_west_rounded)),
+                ButtonSegment(value: 'income', label: Text(_tr(context, 'Ingresos', 'Income')), icon: Icon(Icons.north_east_rounded)),
               ],
               selected: {_type},
               onSelectionChanged: _busy ? null : (value) => setState(() => _type = value.first),
@@ -1628,12 +1628,12 @@ class _CategoryManagerDialogState
                 ),
                 error: (_, __) => const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('No se pudieron cargar las categorías.'),
+                  child: Text(_tr(context, 'No se pudieron cargar las categorías.', 'Could not load categories.')),
                 ),
                 data: (items) => items.isEmpty
                     ? const Padding(
                         padding: EdgeInsets.all(20),
-                        child: Text('Todavía no hay categorías. Agrega la primera.'),
+                        child: Text(_tr(context, 'Todavía no hay categorías. Agrega la primera.', 'There are no categories yet. Add the first one.')),
                       )
                     : ListView(
                         shrinkWrap: true,
@@ -1659,12 +1659,12 @@ class _CategoryManagerDialogState
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.pop(context),
-          child: const Text('Cerrar'),
+          child: Text(_tr(context, 'Cerrar', 'Close')),
         ),
         FilledButton.icon(
           onPressed: _busy ? null : _addCategory,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Agregar'),
+          label: Text(_tr(context, 'Agregar', 'Add')),
         ),
       ],
     );
