@@ -169,7 +169,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
               child: Text(_tr(context, 'Seleccionar moneda', 'Select currency'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
