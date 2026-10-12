@@ -171,7 +171,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
           children: [
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: Text('Seleccionar moneda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(_tr(context, 'Seleccionar moneda', 'Select currency'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             for (final entry in _currencies.entries)
               ListTile(
@@ -231,9 +231,9 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Conversión rápida', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                  Text(_tr(context, 'Conversión rápida', 'Quick conversion'), style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 6),
-                  Text('Consulta tasas de cambio actuales sin modificar tus cuentas ni movimientos.', style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                  Text(_tr(context, 'Consulta tasas de cambio actuales sin modificar tus cuentas ni movimientos.', 'Check current exchange rates without changing your accounts or transactions.'), style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: 24),
                   TextField(
                     controller: _amountController,
@@ -295,7 +295,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                         FilledButton.tonalIcon(
                           onPressed: _loadRates,
                           icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Reintentar'),
+                          label: Text(_tr(context, 'Reintentar', 'Retry')),
                         ),
                       ],
                     )
@@ -310,7 +310,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Resultado estimado', style: TextStyle(color: scheme.onPrimaryContainer)),
+                          Text(_tr(context, 'Resultado estimado', 'Estimated result'), style: TextStyle(color: scheme.onPrimaryContainer)),
                           const SizedBox(height: 6),
                           Text(
                             _converted == null ? '—' : '${_format(_converted!)} $_to',
@@ -396,7 +396,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
           const SizedBox(height: 14),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('Tipo de cambio informativo'),
+            title: Text(_tr(context, 'Tipo de cambio informativo', 'Informational exchange rate')),
             subtitle: Text(
               _updatedAt == null
                   ? 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.'
