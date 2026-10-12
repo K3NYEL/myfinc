@@ -81,7 +81,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
     if (_isRegistering && password != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(_tr(context, 'Las contraseñas no coinciden.', 'Passwords do not match.'))),
+        SnackBar(content: Text(_tr(context, 'Las contraseñas no coinciden.', 'Passwords do not match.'))),
       );
       return;
     }
@@ -272,7 +272,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     TextField(
                       controller: _firstNameController,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: _tr(context, 'Nombres', 'First name'),
                         prefixIcon: Icon(Icons.person_outline),
                         border: OutlineInputBorder(),
@@ -282,7 +282,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     TextField(
                       controller: _lastNameController,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: _tr(context, 'Apellidos', 'Last name'),
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
@@ -324,7 +324,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     TextField(
                       controller: _firstNameController,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: _tr(context, 'Nombres', 'First name'),
                         hintText: 'Escribe tus nombres',
                         prefixIcon: Icon(Icons.person_outline),
@@ -335,7 +335,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     TextField(
                       controller: _lastNameController,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: _tr(context, 'Apellidos', 'Last name'),
                         hintText: 'Escribe tus apellidos',
                         prefixIcon: Icon(Icons.badge_outlined),
