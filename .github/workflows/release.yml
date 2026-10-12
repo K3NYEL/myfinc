@@ -131,7 +131,8 @@ jobs:
           EOF
 
       - name: Analyze
-        run: flutter analyze
+        # Match CI: informational lints should not block a release; warnings/errors still fail.
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         run: flutter test
