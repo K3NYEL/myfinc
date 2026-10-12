@@ -399,8 +399,8 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
             title: Text(_tr(context, 'Tipo de cambio informativo', 'Informational exchange rate')),
             subtitle: Text(
               _updatedAt == null
-                  ? 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.'
-                  : 'Última actualización del proveedor: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.',
+                  ? _tr(context, 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.', 'Rates may vary and the provider may update them periodically.')
+                  : _tr(context, 'Última actualización del proveedor: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.', 'Provider last updated: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.'),
             ),
           ),
           const SizedBox(height: 8),
