@@ -13,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../features/auth/presentation/session_provider.dart';
 import '../../../../app/settings_provider.dart';
 import '../../../../core/platform/update_service.dart';
-import '../../../../core/updates/notifications_and_patches_dialog.dart';
 import '../../../../core/notifications/notification_permission_service.dart';
 import '../../../../core/database/database.dart';
 import '../../../../core/database/backup_service.dart';
@@ -1028,7 +1027,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Configuración',
+                      settings.languageCode == 'en' ? 'Settings' : 'Configuración',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1046,19 +1045,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // APARIENCIA
         // =========================
         _SettingsSection(
-          title: 'Apariencia',
+          title: settings.languageCode == 'en' ? 'Appearance' : 'Apariencia',
           children: [
             _SettingsTile(
               icon: Icons.palette_outlined,
-              title: 'Tema',
-              subtitle: _themeLabel(settings.theme),
+              title: settings.languageCode == 'en' ? 'Theme' : 'Tema',
+              subtitle: _themeLabel(settings.theme, settings.languageCode),
               onTap: () => _showThemeSelector(context, ref),
             ),
             _SettingsTile(
               icon: Icons.animation_outlined,
-              title: 'Animaciones',
+              title: settings.languageCode == 'en' ? 'Animations' : 'Animaciones',
               subtitle:
-                  settings.animationsEnabled ? 'Activadas' : 'Desactivadas',
+                  settings.languageCode == 'en'
+                      ? (settings.animationsEnabled ? 'Enabled' : 'Disabled')
+                      : (settings.animationsEnabled ? 'Activadas' : 'Desactivadas'),
               trailing: Switch(
                 value: settings.animationsEnabled,
                 onChanged: (value) {
@@ -1069,16 +1070,40 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ],
         ),
 
+        _SettingsSection(
+          title: settings.languageCode == 'en' ? 'Language' : 'Idioma',
+          children: [
+            _SettingsTile(
+              icon: Icons.language_rounded,
+              title: settings.languageCode == 'en' ? 'App language' : 'Idioma de la aplicación',
+              subtitle: settings.languageCode == 'en' ? 'English' : 'Español',
+              trailing: DropdownButton<String>(
+                value: settings.languageCode,
+                underline: const SizedBox.shrink(),
+                items: const [
+                  DropdownMenuItem(value: 'es', child: Text('Español')),
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(settingsProvider.notifier).setLanguage(value);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+
         // =========================
         // FINANZAS
         // =========================
         _SettingsSection(
-          title: 'Finanzas',
+          title: settings.languageCode == 'en' ? 'Finances' : 'Finanzas',
           children: [
             _SettingsTile(
               icon: Icons.currency_exchange_rounded,
-              title: 'Monedas y conversor',
-              subtitle: 'Convierte divisas y configura la moneda de visualización',
+              title: settings.languageCode == 'en' ? 'Currencies and converter' : 'Monedas y conversor',
+              subtitle: settings.languageCode == 'en' ? 'Convert currencies and set the display currency' : 'Convierte divisas y configura la moneda de visualización',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const CurrencyConverterPage(),
@@ -1087,8 +1112,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.savings_outlined,
-              title: 'Presupuestos y metas de ahorro',
-              subtitle: 'Controla el límite mensual y el progreso de tus metas',
+              title: settings.languageCode == 'en' ? 'Budgets and savings goals' : 'Presupuestos y metas de ahorro',
+              subtitle: settings.languageCode == 'en' ? 'Track monthly limits and savings progress' : 'Controla el límite mensual y el progreso de tus metas',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const FinancePlanningPage(),
@@ -1097,20 +1122,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.category_outlined,
-              title: 'Categorías',
-              subtitle: 'Administrar categorías de ingresos y gastos',
+              title: settings.languageCode == 'en' ? 'Categories' : 'Categorías',
+              subtitle: settings.languageCode == 'en' ? 'Manage income and expense categories' : 'Administrar categorías de ingresos y gastos',
               onTap: _showCategoryManager,
             ),
           ],
         ),
 
         _SettingsSection(
-          title: 'Cuenta',
+          title: settings.languageCode == 'en' ? 'Account' : 'Cuenta',
           children: [
             _SettingsTile(
               icon: Icons.cloud_sync_outlined,
-              title: 'Vincular cuenta MyFinc',
-              subtitle: 'Conectar una cuenta remota para preparar la futura sincronización',
+              title: settings.languageCode == 'en' ? 'Link MyFinc account' : 'Vincular cuenta MyFinc',
+              subtitle: settings.languageCode == 'en' ? 'Connect a remote account for future sync' : 'Conectar una cuenta remota para preparar la futura sincronización',
               onTap: () => context.push('/settings/cloud-account'),
             ),
             _SettingsTile(
@@ -1189,21 +1214,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // ACTUALIZACIONES
         // =========================
         _SettingsSection(
-          title: 'Actualizaciones',
+          title: settings.languageCode == 'en' ? 'Updates' : 'Actualizaciones',
           children: [
             _SettingsTile(
-              icon: Icons.notifications_active_outlined,
-              title: 'Notificaciones y parches',
-              subtitle: 'Consultar avisos, correcciones y notas de versión',
-              onTap: () => showDialog<void>(
-                context: context,
-                builder: (_) => const NotificationsAndPatchesDialog(),
-              ),
-            ),
-            _SettingsTile(
               icon: Icons.notifications_outlined,
-              title: 'Permisos de notificación',
-              subtitle: 'Consultar o cambiar el permiso del dispositivo',
+              title: settings.languageCode == 'en' ? 'Notification permissions' : 'Permisos de notificación',
+              subtitle: settings.languageCode == 'en' ? 'Check or change device permissions' : 'Consultar o cambiar el permiso del dispositivo',
               onTap: () async {
                 if (!NotificationPermissionService.isAndroid) {
                   await _showUpdateMessage(
@@ -1228,10 +1244,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.system_update_outlined,
-              title: 'Buscar actualizaciones',
+              title: settings.languageCode == 'en' ? 'Check for updates' : 'Buscar actualizaciones',
               subtitle: _checkingForUpdate
-                  ? 'Comprobando la última versión...'
-                  : 'Comprobar si existe una nueva versión',
+                  ? (settings.languageCode == 'en' ? 'Checking latest version...' : 'Comprobando la última versión...')
+                  : (settings.languageCode == 'en' ? 'Check for a newer version' : 'Comprobar si existe una nueva versión'),
               trailing: _checkingForUpdate
                   ? const SizedBox(
                       width: 22,
@@ -1245,7 +1261,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _SettingsTile(
               icon: Icons.info_outline,
-              title: 'Versión actual',
+              title: settings.languageCode == 'en' ? 'Current version' : 'Versión actual',
               subtitle:
                   _currentVersion == null ? 'Cargando...' : 'v$_currentVersion',
             ),
@@ -1256,7 +1272,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // ACERCA DE
         // =========================
         _SettingsSection(
-          title: 'Acerca de',
+          title: settings.languageCode == 'en' ? 'About' : 'Acerca de',
           children: [
             _SettingsTile(
               icon: Icons.auto_graph_rounded,
@@ -1362,14 +1378,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  String _themeLabel(ThemePreference theme) {
+  String _themeLabel(ThemePreference theme, String languageCode) {
     switch (theme) {
       case ThemePreference.system:
-        return 'Usar configuración del sistema';
+        return languageCode == 'en' ? 'System default' : 'Usar configuración del sistema';
       case ThemePreference.light:
-        return 'Tema claro';
+        return languageCode == 'en' ? 'Light theme' : 'Tema claro';
       case ThemePreference.dark:
-        return 'Tema oscuro';
+        return languageCode == 'en' ? 'Dark theme' : 'Tema oscuro';
     }
   }
 

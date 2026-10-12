@@ -5,6 +5,7 @@ class AppPreferences {
   AppPreferences._();
 
   static const _themeKey = 'theme_mode';
+  static const _languageKey = 'app_language';
   static const _animationsKey = 'animations_enabled';
   static const _currencyKey = 'finance_currency';
   static const _autoBackupFrequencyKey = 'auto_backup_frequency';
@@ -68,6 +69,20 @@ class AppPreferences {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currencyKey, code);
     setCurrencyCodeInMemory(code);
+  }
+
+  static Future<String> getLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_languageKey) ?? 'es';
+    return const {'es', 'en'}.contains(value) ? value : 'es';
+  }
+
+  static Future<void> setLanguage(String language) async {
+    if (!const {'es', 'en'}.contains(language)) {
+      throw ArgumentError.value(language, 'language', 'Idioma no compatible');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_languageKey, language);
   }
 
   static Future<ThemePreference> getTheme() async {

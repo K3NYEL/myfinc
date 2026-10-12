@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/notifications/fcm_service.dart';
@@ -55,6 +56,9 @@ class _MyFincAppState extends ConsumerState<MyFincApp>
       theme: _lightTheme,
       darkTheme: _darkTheme,
       themeMode: settings.themeMode,
+      locale: Locale(settings.languageCode),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       routerConfig: ref.watch(appRouterProvider),
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
