@@ -714,7 +714,7 @@ class StatisticsPage extends ConsumerWidget {
                     )),
                     const SizedBox(height: 4),
                     Text(
-                      'Resumen de este mes',
+                      _tr(context, 'Resumen de este mes', "This month's summary"),
                       style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ],
@@ -776,7 +776,7 @@ class StatisticsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    balance >= 0 ? 'Vas por encima de tus gastos' : 'Tus gastos superan tus ingresos',
+                    balance >= 0 ? _tr(context, 'Vas por encima de tus gastos', 'You are spending less than you earn') : _tr(context, 'Tus gastos superan tus ingresos', 'Your expenses exceed your income'),
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
                   ),
                 ],
@@ -867,7 +867,7 @@ class StatisticsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Dónde se concentra tu dinero',
+            _tr(context, 'Dónde se concentra tu dinero', 'Where your money goes'),
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 10),
@@ -882,7 +882,7 @@ class StatisticsPage extends ConsumerWidget {
                     Text(_tr(context, 'Aún no hay gastos por categoría', 'No expenses by category yet'), style: theme.textTheme.titleSmall),
                     const SizedBox(height: 5),
                     Text(
-                      'Cuando registres gastos, aquí verás cómo se distribuyen.',
+                      _tr(context, 'Cuando registres gastos, aquí verás cómo se distribuyen.', 'Once you record expenses, you will see how they are distributed here.'),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                     ),
