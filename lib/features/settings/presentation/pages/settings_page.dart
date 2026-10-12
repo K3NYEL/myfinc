@@ -1180,34 +1180,34 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.backup_outlined,
               title: _tr(context, 'Copia de seguridad', 'Backup'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Exportar cuentas y movimientos a un archivo JSON',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Exportar cuentas y movimientos a un archivo JSON', 'Export accounts and transactions to a JSON file'),
               onTap: _dataOperationInProgress ? null : _backupData,
             ),
             _SettingsTile(
               icon: Icons.restore_outlined,
               title: _tr(context, 'Restaurar datos', 'Restore data'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Importar una copia JSON sin borrar los datos actuales',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Importar una copia JSON sin borrar los datos actuales', 'Import a JSON backup without deleting current data'),
               onTap: _dataOperationInProgress ? null : _restoreData,
             ),
             _SettingsTile(
               icon: Icons.cloud_upload_outlined,
               title: _tr(context, 'Migrar copia a la nube', 'Migrate backup to cloud'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
                   : ref.watch(remoteAuthSessionProvider) == null
-                      ? 'Requiere una sesión de cuenta en la nube'
-                      : 'Previsualizar e importar una copia a tu cuenta remota',
+                      ? _tr(context, 'Requiere una sesión de cuenta en la nube', 'Requires a signed-in cloud account')
+                      : _tr(context, 'Previsualizar e importar una copia a tu cuenta remota', 'Preview and import a backup to your remote account'),
               onTap: _dataOperationInProgress ? null : _migrateBackupToCloud,
             ),
             _SettingsTile(
               icon: Icons.history_rounded,
               title: _tr(context, 'Recuperar datos antiguos', 'Recover older data'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Revisar y recuperar datos sin propietario asignado',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Revisar y recuperar datos sin propietario asignado', 'Review and recover data without an assigned owner'),
               onTap: _dataOperationInProgress ? null : _recoverLegacyData,
             ),
             _SettingsTile(
@@ -1220,8 +1220,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.delete_forever_outlined,
               title: _tr(context, 'Eliminar todos los datos', 'Delete all data'),
               subtitle: _dataOperationInProgress
-                  ? 'Operación en curso…'
-                  : 'Borrar los datos financieros de esta cuenta tras crear una copia',
+                  ? _tr(context, 'Operación en curso…', 'Operation in progress…')
+                  : _tr(context, 'Borrar los datos financieros de esta cuenta tras crear una copia', 'Delete this account’s financial data after creating a backup'),
               onTap: _dataOperationInProgress ? null : _deleteAllData,
             ),
             _SettingsTile(
@@ -1259,7 +1259,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 } else {
                   await _showUpdateMessage(
                     title: _tr(context, 'Notificaciones permitidas', 'Notifications allowed'),
-                    message: 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.',
+                    message: _tr(context, 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.', 'Device notification permission is enabled. Version announcements are available in the MyFinc notification center.'),
                     icon: Icons.check_circle_outline_rounded,
                   );
                 }
@@ -1323,7 +1323,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Gestión financiera personal',
+                            _tr(context, 'Gestión financiera personal', 'Personal finance management'),
                             textAlign: TextAlign.center,
                             style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(
                                   color: Theme.of(dialogContext).colorScheme.primary,
@@ -1338,7 +1338,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Funciones principales',
+                              _tr(context, 'Funciones principales', 'Key features'),
                               style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -1360,7 +1360,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Versión ${packageInfo.version}',
+                            _tr(context, 'Versión ${packageInfo.version}', 'Version ${packageInfo.version}'),
                             style: Theme.of(dialogContext).textTheme.labelMedium,
                           ),
                         ],
