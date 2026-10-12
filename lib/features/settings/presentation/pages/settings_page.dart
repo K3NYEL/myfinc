@@ -50,6 +50,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     _loadAutoBackupFrequency();
   }
 
+  Future<void> _changeLanguage(String languageCode) async {
+    if (languageCode == ref.read(settingsProvider).languageCode) return;
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: languageCode == 'en' ? 'Changing language' : 'Cambiando idioma',
+      barrierColor: Theme.of(context).scaffoldBackgroundColor,
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) =>
+          _LanguageChangeScreen(
+        languageCode: languageCode,
+        applyLanguage: () =>
+            ref.read(settingsProvider.notifier).setLanguage(languageCode),
+      ),
+      transitionBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+  }
+
   Future<void> _loadCurrentVersion() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -1089,7 +1108,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
                 onChanged: (value) {
                   if (value != null) {
-                    ref.read(settingsProvider.notifier).setLanguage(value);
+                    _changeLanguage(value);
                   }
                 },
               ),
@@ -1799,6 +1818,153 @@ class _SettingsTile extends StatelessWidget {
       trailing: trailing ??
           (onTap != null ? const Icon(Icons.chevron_right_rounded) : null),
       onTap: onTap,
+    );
+  }
+}
+
+class _LanguageChangeScreen extends StatefulWidget {
+  const _LanguageChangeScreen({
+    required this.languageCode,
+    required this.applyLanguage,
+  });
+
+  final String languageCode;
+  final Future<void> Function() applyLanguage;
+
+  @override
+  State<_LanguageChangeScreen> createState() => _LanguageChangeScreenState();
+}
+
+class _LanguageChangeScreenState extends State<_LanguageChangeScreen> {
+  int _stage = 0;
+  Object? _error;
+
+  bool get _isEnglish => widget.languageCode == 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _runTransition();
+  }
+
+  Future<void> _runTransition() async {
+    // Give the first loading message time to render before applying the locale.
+    await Future<void>.delayed(const Duration(milliseconds: 450));
+    try {
+      await widget.applyLanguage();
+      if (!mounted) return;
+      setState(() => _stage = 1);
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      setState(() => _stage = 2);
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = error);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final messages = _isEnglish
+        ? const ['Loading', 'Almost ready', 'Done, language changed successfully']
+        : const ['Cargando', 'Ya casi listo', 'Listo, idioma cambiado correctamente'];
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Icon(
+                      _error != null
+                          ? Icons.error_outline_rounded
+                          : _stage == 2
+                              ? Icons.check_rounded
+                              : Icons.translate_rounded,
+                      size: 44,
+                      color: scheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: Text(
+                      _error != null
+                          ? (_isEnglish ? 'Could not change language' : 'No se pudo cambiar el idioma')
+                          : messages[_stage],
+                      key: ValueKey('$_stage-$_error'),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  if (_error == null && _stage < 2)
+                    const SizedBox(
+                      width: 34,
+                      height: 34,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    )
+                  else
+                    Icon(
+                      _error != null ? Icons.info_outline_rounded : Icons.check_circle_rounded,
+                      size: 34,
+                      color: _error != null ? scheme.error : scheme.primary,
+                    ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      _isEnglish
+                          ? 'Please try again from Settings.'
+                          : 'Inténtalo de nuevo desde Configuración.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                      child: Text(_isEnglish ? 'Close' : 'Cerrar'),
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      minHeight: 5,
+                      value: _error != null ? null : (_stage + 1) / 3,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'MyFinc',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
