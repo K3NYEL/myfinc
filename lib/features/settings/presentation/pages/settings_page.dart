@@ -117,7 +117,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _tr(context, 'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.', 'MyFinc will save a local backup at sign-in once the selected interval has passed. It does not run in the background while the app is closed. JSON files are not encrypted and contain readable financial data; keep them somewhere private.'),
             ),
           ),
-          for (final option in const [
+          for (final option in [
             ('disabled', _tr(context, 'Desactivada', 'Disabled')),
             ('daily', _tr(context, 'Cada 24 horas al iniciar sesión', 'Every 24 hours at sign-in')),
             ('weekly', _tr(context, 'Cada 7 días al iniciar sesión', 'Every 7 days at sign-in')),
@@ -467,7 +467,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         content: SizedBox(
           width: 460,
           child: backups.isEmpty
-              ? const Text(
+              ? Text(
                   _tr(context, 'No se encontraron copias de MyFinc en la carpeta habitual. Puedes buscar una copia guardada en otra ubicación.', 'No MyFinc backups were found in the usual folder. You can look for a backup saved elsewhere.'),
                 )
               : ConstrainedBox(
