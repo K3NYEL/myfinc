@@ -326,12 +326,12 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
                             const SizedBox(height: 12),
                             Text(_tr(context, 'Gastado este mes: ${money(_spentThisMonth)}', 'Spent this month: ${money(_spentThisMonth)}'), style: theme.textTheme.bodyLarge),
                             const SizedBox(height: 6),
-                            Text(limit == null ? 'Aún no has establecido un límite mensual.' : 'Límite: ${money(limit)} · Disponible: ${money(limit - _spentThisMonth)}'),
+                            Text(limit == null ? _tr(context, 'Aún no has establecido un límite mensual.', 'You have not set a monthly limit yet.') : _tr(context, 'Límite: ${money(limit)} · Disponible: ${money(limit - _spentThisMonth)}', 'Limit: ${money(limit)} · Remaining: ${money(limit - _spentThisMonth)}')),
                             if (limit != null) ...[
                               const SizedBox(height: 12),
                               LinearProgressIndicator(value: ratio, minHeight: 8),
                               const SizedBox(height: 6),
-                              Text(_spentThisMonth > limit ? 'Has superado el presupuesto mensual.' : '${(ratio * 100).round()}% del presupuesto utilizado', style: theme.textTheme.bodySmall?.copyWith(color: _spentThisMonth > limit ? scheme.error : scheme.onSurfaceVariant)),
+                              Text(_spentThisMonth > limit ? _tr(context, 'Has superado el presupuesto mensual.', 'You have exceeded your monthly budget.') : _tr(context, '${(ratio * 100).round()}% del presupuesto utilizado', '${(ratio * 100).round()}% of budget used'), style: theme.textTheme.bodySmall?.copyWith(color: _spentThisMonth > limit ? scheme.error : scheme.onSurfaceVariant)),
                             ],
                             if (limit == null) ...[
                               const SizedBox(height: 12),
@@ -384,7 +384,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
             IconButton(tooltip: _tr(context, 'Añadir ahorro', 'Add savings'), onPressed: _saving ? null : () => _addContribution(goal), icon: const Icon(Icons.add_circle_outline_rounded)),
           ]),
           const SizedBox(height: 6),
-          Text('${money(saved)} de ${money(target)}'),
+          Text(_tr(context, '${money(saved)} de ${money(target)}', '${money(saved)} of ${money(target)}')),
           const SizedBox(height: 10),
           LinearProgressIndicator(value: ratio, minHeight: 8),
           const SizedBox(height: 6),
