@@ -47,7 +47,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'Inicia sesión para consultar tu planificación financiera.';
+          _error = _tr(context, 'Inicia sesión para consultar tu planificación financiera.', 'Sign in to view your financial plan.');
         });
       }
       return;
@@ -96,7 +96,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'No se pudo cargar la planificación financiera.';
+        _error = _tr(context, 'No se pudo cargar la planificación financiera.', 'Could not load financial planning.');
       });
     }
   }
@@ -104,12 +104,12 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
   int _minorUnits(String raw) {
     final amount = double.tryParse(raw.trim().replaceAll(',', '.'));
     if (amount == null || !amount.isFinite || amount <= 0 || amount > 90071992547409.91) {
-      throw const AppException('Introduce un monto válido mayor que cero.');
+      throw AppException(_tr(context, 'Introduce un monto válido mayor que cero.', 'Enter a valid amount greater than zero.'));
     }
     final scaled = amount * 100;
     final minor = scaled.round();
     if ((scaled - minor).abs() > 0.000001) {
-      throw const AppException('Usa como máximo dos decimales.');
+      throw AppException(_tr(context, 'Usa como máximo dos decimales.', 'Use no more than two decimal places.'));
     }
     return minor;
   }
@@ -182,7 +182,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
     if (_saving) return;
     final raw = await _promptAmount(
       title: _tr(context, 'Presupuesto mensual', 'Monthly budget'),
-      label: 'Límite para $_periodLabel',
+      label: _tr(context, 'Límite para $_periodLabel', 'Limit for $_periodLabel'),
       initial: _budget == null
           ? ''
           : (((_budget!['limit_minor'] as num).toInt()) / 100).toStringAsFixed(2),
@@ -191,7 +191,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
     try {
       final limit = _minorUnits(raw);
       final user = ref.read(sessionProvider);
-      if (user == null) throw const AppException('Inicia sesión e inténtalo de nuevo.');
+      if (user == null) throw AppException(_tr(context, 'Inicia sesión e inténtalo de nuevo.', 'Sign in and try again.'));
       setState(() => _saving = true);
       final db = await AppDatabase.instance;
       final now = DateTime.now().toUtc().toIso8601String();
