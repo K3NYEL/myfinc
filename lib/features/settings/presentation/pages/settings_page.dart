@@ -246,7 +246,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       await _showUpdateMessage(
         title: _tr(context, 'Datos eliminados', 'Data deleted'),
-        message: 'Se eliminaron ${deleted['accounts']} cuentas, ${deleted['transactions']} movimientos y ${deleted['transfers']} transferencias. La copia preventiva está guardada como ${p.basename(safetyFile.path)}.',
+        message: _tr(context, 'Se eliminaron ${deleted['accounts']} cuentas, ${deleted['transactions']} movimientos y ${deleted['transfers']} transferencias. La copia preventiva está guardada como ${p.basename(safetyFile.path)}.', 'Deleted ${deleted['accounts']} accounts, ${deleted['transactions']} transactions, and ${deleted['transfers']} transfers. The safety backup is saved as ${p.basename(safetyFile.path)}.'),
         icon: Icons.check_circle_outline_rounded,
       );
     } catch (error) {
@@ -254,7 +254,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       await _showUpdateMessage(
         title: _tr(context, 'No se pudieron eliminar los datos', 'Could not delete data'),
-        message: error is AppException ? error.message : 'No se completó la eliminación. Si falló la copia preventiva, tus datos no se eliminaron.',
+        message: error is AppException ? error.message : _tr(context, 'No se completó la eliminación. Si falló la copia preventiva, tus datos no se eliminaron.', 'Deletion was not completed. If the safety backup failed, your data was not deleted.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -411,7 +411,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await loadingRoute;
       await _showUpdateMessage(
         title: _tr(context, 'Copia guardada', 'Backup saved'),
-        message: 'La copia se guardó localmente.\n\nRuta:\n${file.path}\n\nImportante: el archivo JSON no está cifrado y contiene datos financieros legibles. Guárdalo en un lugar privado. No contiene contraseñas ni hashes de acceso.',
+        message: _tr(context, 'La copia se guardó localmente.\n\nRuta:\n${file.path}\n\nImportante: el archivo JSON no está cifrado y contiene datos financieros legibles. Guárdalo en un lugar privado. No contiene contraseñas ni hashes de acceso.', 'The backup was saved locally.\n\nPath:\n${file.path}\n\nImportant: the JSON file is not encrypted and contains readable financial data. Keep it somewhere private. It does not contain passwords or sign-in hashes.'),
         icon: Icons.check_circle_outline_rounded,
       );
     } catch (error) {
@@ -423,7 +423,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       await _showUpdateMessage(
         title: _tr(context, 'No se pudo crear la copia', 'Could not create backup'),
-        message: error is AppException ? error.message : 'Ocurrió un error al generar o guardar la copia de seguridad.',
+        message: error is AppException ? error.message : _tr(context, 'Ocurrió un error al generar o guardar la copia de seguridad.', 'An error occurred while creating or saving the backup.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -468,8 +468,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           width: 460,
           child: backups.isEmpty
               ? const Text(
-                  'No se encontraron copias de MyFinc en la carpeta habitual. '
-                  'Puedes buscar una copia guardada en otra ubicación.',
+                  _tr(context, 'No se encontraron copias de MyFinc en la carpeta habitual. Puedes buscar una copia guardada en otra ubicación.', 'No MyFinc backups were found in the usual folder. You can look for a backup saved elsewhere.'),
                 )
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 360),
