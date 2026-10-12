@@ -1083,7 +1083,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               trailing: DropdownButton<String>(
                 value: settings.languageCode,
                 underline: const SizedBox.shrink(),
-                items: const [
+                items: [
                   DropdownMenuItem(value: 'es', child: Text(_tr(context, 'Español', 'Spanish'))),
                   DropdownMenuItem(value: 'en', child: Text(_tr(context, 'English', 'English'))),
                 ],
@@ -1610,7 +1610,7 @@ class _CategoryManagerDialogState
           mainAxisSize: MainAxisSize.min,
           children: [
             SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(value: 'expense', label: Text(_tr(context, 'Gastos', 'Expenses')), icon: Icon(Icons.south_west_rounded)),
                 ButtonSegment(value: 'income', label: Text(_tr(context, 'Ingresos', 'Income')), icon: Icon(Icons.north_east_rounded)),
               ],
