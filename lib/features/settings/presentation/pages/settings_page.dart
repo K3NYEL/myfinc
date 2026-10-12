@@ -50,6 +50,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     _loadAutoBackupFrequency();
   }
 
+  Future<void> _changeLanguage(String languageCode) async {
+    if (languageCode == ref.read(settingsProvider).languageCode) return;
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: languageCode == 'en' ? 'Changing language' : 'Cambiando idioma',
+      barrierColor: Theme.of(context).scaffoldBackgroundColor,
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) =>
+          _LanguageChangeScreen(
+        languageCode: languageCode,
+        applyLanguage: () =>
+            ref.read(settingsProvider.notifier).setLanguage(languageCode),
+      ),
+      transitionBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+  }
+
   Future<void> _loadCurrentVersion() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -63,7 +82,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
 
       setState(() {
-        _currentVersion = 'Desconocida';
+        _currentVersion = Localizations.localeOf(context).languageCode == 'en' ? 'Unknown' : 'Desconocida';
       });
     }
   }
@@ -74,14 +93,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     setState(() => _autoBackupFrequency = frequency);
   }
 
-  String _autoBackupLabel(String frequency) {
+  String _autoBackupLabel(String frequency, String languageCode) {
+    final isEnglish = languageCode == 'en';
     switch (frequency) {
       case 'daily':
-        return 'Diaria al iniciar sesión';
+        return isEnglish ? 'Daily at sign-in' : 'Diaria al iniciar sesión';
       case 'weekly':
-        return 'Semanal al iniciar sesión';
+        return isEnglish ? 'Weekly at sign-in' : 'Semanal al iniciar sesión';
       default:
-        return 'Desactivada';
+        return isEnglish ? 'Disabled' : 'Desactivada';
     }
   }
 
@@ -94,13 +114,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Padding(
             padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
             child: Text(
-              'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.',
+              _tr(context, 'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.', 'MyFinc will save a local backup at sign-in once the selected interval has passed. It does not run in the background while the app is closed. JSON files are not encrypted and contain readable financial data; keep them somewhere private.'),
             ),
           ),
-          for (final option in const [
-            ('disabled', 'Desactivada'),
-            ('daily', 'Cada 24 horas al iniciar sesión'),
-            ('weekly', 'Cada 7 días al iniciar sesión'),
+          for (final option in [
+            ('disabled', _tr(context, 'Desactivada', 'Disabled')),
+            ('daily', _tr(context, 'Cada 24 horas al iniciar sesión', 'Every 24 hours at sign-in')),
+            ('weekly', _tr(context, 'Cada 7 días al iniciar sesión', 'Every 7 days at sign-in')),
           ])
             SimpleDialogOption(
               onPressed: () => Navigator.pop(dialogContext, option.$1),
@@ -122,8 +142,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     await _showUpdateMessage(
       title: _tr(context, 'Copia automática actualizada', 'Automatic backup updated'),
       message: selected == 'disabled'
-          ? 'La creación automática de copias quedó desactivada.'
-          : 'MyFinc intentará crear una copia cada ${selected == 'daily' ? '24 horas' : '7 días'} al iniciar sesión. Si no se puede guardar, el inicio de sesión seguirá funcionando y se volverá a intentar en el siguiente inicio.',
+          ? _tr(context, 'La creación automática de copias quedó desactivada.', 'Automatic backups have been disabled.')
+          : _tr(context, 'MyFinc intentará crear una copia cada ${selected == 'daily' ? '24 horas' : '7 días'} al iniciar sesión. Si no se puede guardar, el inicio de sesión seguirá funcionando y se volverá a intentar en el siguiente inicio.', 'MyFinc will try to create a backup every ${selected == 'daily' ? '24 hours' : '7 days'} at sign-in. If saving fails, sign-in will continue normally and the backup will be retried next time.'),
       icon: Icons.backup_outlined,
     );
   }
@@ -226,7 +246,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       await _showUpdateMessage(
         title: _tr(context, 'Datos eliminados', 'Data deleted'),
-        message: 'Se eliminaron ${deleted['accounts']} cuentas, ${deleted['transactions']} movimientos y ${deleted['transfers']} transferencias. La copia preventiva está guardada como ${p.basename(safetyFile.path)}.',
+        message: _tr(context, 'Se eliminaron ${deleted['accounts']} cuentas, ${deleted['transactions']} movimientos y ${deleted['transfers']} transferencias. La copia preventiva está guardada como ${p.basename(safetyFile.path)}.', 'Deleted ${deleted['accounts']} accounts, ${deleted['transactions']} transactions, and ${deleted['transfers']} transfers. The safety backup is saved as ${p.basename(safetyFile.path)}.'),
         icon: Icons.check_circle_outline_rounded,
       );
     } catch (error) {
@@ -234,7 +254,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       await _showUpdateMessage(
         title: _tr(context, 'No se pudieron eliminar los datos', 'Could not delete data'),
-        message: error is AppException ? error.message : 'No se completó la eliminación. Si falló la copia preventiva, tus datos no se eliminaron.',
+        message: error is AppException ? error.message : _tr(context, 'No se completó la eliminación. Si falló la copia preventiva, tus datos no se eliminaron.', 'Deletion was not completed. If the safety backup failed, your data was not deleted.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -391,7 +411,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await loadingRoute;
       await _showUpdateMessage(
         title: _tr(context, 'Copia guardada', 'Backup saved'),
-        message: 'La copia se guardó localmente.\n\nRuta:\n${file.path}\n\nImportante: el archivo JSON no está cifrado y contiene datos financieros legibles. Guárdalo en un lugar privado. No contiene contraseñas ni hashes de acceso.',
+        message: _tr(context, 'La copia se guardó localmente.\n\nRuta:\n${file.path}\n\nImportante: el archivo JSON no está cifrado y contiene datos financieros legibles. Guárdalo en un lugar privado. No contiene contraseñas ni hashes de acceso.', 'The backup was saved locally.\n\nPath:\n${file.path}\n\nImportant: the JSON file is not encrypted and contains readable financial data. Keep it somewhere private. It does not contain passwords or sign-in hashes.'),
         icon: Icons.check_circle_outline_rounded,
       );
     } catch (error) {
@@ -403,7 +423,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       await _showUpdateMessage(
         title: _tr(context, 'No se pudo crear la copia', 'Could not create backup'),
-        message: error is AppException ? error.message : 'Ocurrió un error al generar o guardar la copia de seguridad.',
+        message: error is AppException ? error.message : _tr(context, 'Ocurrió un error al generar o guardar la copia de seguridad.', 'An error occurred while creating or saving the backup.'),
         icon: Icons.error_outline_rounded,
       );
     } finally {
@@ -447,9 +467,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         content: SizedBox(
           width: 460,
           child: backups.isEmpty
-              ? const Text(
-                  'No se encontraron copias de MyFinc en la carpeta habitual. '
-                  'Puedes buscar una copia guardada en otra ubicación.',
+              ? Text(
+                  _tr(context, 'No se encontraron copias de MyFinc en la carpeta habitual. Puedes buscar una copia guardada en otra ubicación.', 'No MyFinc backups were found in the usual folder. You can look for a backup saved elsewhere.'),
                 )
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 360),
@@ -1089,7 +1108,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
                 onChanged: (value) {
                   if (value != null) {
-                    ref.read(settingsProvider.notifier).setLanguage(value);
+                    _changeLanguage(value);
                   }
                 },
               ),
@@ -1160,48 +1179,48 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.backup_outlined,
               title: _tr(context, 'Copia de seguridad', 'Backup'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Exportar cuentas y movimientos a un archivo JSON',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Exportar cuentas y movimientos a un archivo JSON', 'Export accounts and transactions to a JSON file'),
               onTap: _dataOperationInProgress ? null : _backupData,
             ),
             _SettingsTile(
               icon: Icons.restore_outlined,
               title: _tr(context, 'Restaurar datos', 'Restore data'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Importar una copia JSON sin borrar los datos actuales',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Importar una copia JSON sin borrar los datos actuales', 'Import a JSON backup without deleting current data'),
               onTap: _dataOperationInProgress ? null : _restoreData,
             ),
             _SettingsTile(
               icon: Icons.cloud_upload_outlined,
               title: _tr(context, 'Migrar copia a la nube', 'Migrate backup to cloud'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
                   : ref.watch(remoteAuthSessionProvider) == null
-                      ? 'Requiere una sesión de cuenta en la nube'
-                      : 'Previsualizar e importar una copia a tu cuenta remota',
+                      ? _tr(context, 'Requiere una sesión de cuenta en la nube', 'Requires a signed-in cloud account')
+                      : _tr(context, 'Previsualizar e importar una copia a tu cuenta remota', 'Preview and import a backup to your remote account'),
               onTap: _dataOperationInProgress ? null : _migrateBackupToCloud,
             ),
             _SettingsTile(
               icon: Icons.history_rounded,
               title: _tr(context, 'Recuperar datos antiguos', 'Recover older data'),
               subtitle: _dataOperationInProgress
-                  ? 'Preparando operación...'
-                  : 'Revisar y recuperar datos sin propietario asignado',
+                  ? _tr(context, 'Preparando operación...', 'Preparing operation...')
+                  : _tr(context, 'Revisar y recuperar datos sin propietario asignado', 'Review and recover data without an assigned owner'),
               onTap: _dataOperationInProgress ? null : _recoverLegacyData,
             ),
             _SettingsTile(
               icon: Icons.backup_table_outlined,
               title: _tr(context, 'Copia automática', 'Automatic backup'),
-              subtitle: _autoBackupLabel(_autoBackupFrequency),
+              subtitle: _autoBackupLabel(_autoBackupFrequency, settings.languageCode),
               onTap: _dataOperationInProgress ? null : _configureAutoBackup,
             ),
             _SettingsTile(
               icon: Icons.delete_forever_outlined,
               title: _tr(context, 'Eliminar todos los datos', 'Delete all data'),
               subtitle: _dataOperationInProgress
-                  ? 'Operación en curso…'
-                  : 'Borrar los datos financieros de esta cuenta tras crear una copia',
+                  ? _tr(context, 'Operación en curso…', 'Operation in progress…')
+                  : _tr(context, 'Borrar los datos financieros de esta cuenta tras crear una copia', 'Delete this account’s financial data after creating a backup'),
               onTap: _dataOperationInProgress ? null : _deleteAllData,
             ),
             _SettingsTile(
@@ -1239,7 +1258,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 } else {
                   await _showUpdateMessage(
                     title: _tr(context, 'Notificaciones permitidas', 'Notifications allowed'),
-                    message: 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.',
+                    message: _tr(context, 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.', 'Device notification permission is enabled. Version announcements are available in the MyFinc notification center.'),
                     icon: Icons.check_circle_outline_rounded,
                   );
                 }
@@ -1266,7 +1285,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.info_outline,
               title: settings.languageCode == 'en' ? 'Current version' : 'Versión actual',
               subtitle:
-                  _currentVersion == null ? 'Cargando...' : 'v$_currentVersion',
+                  _currentVersion == null ? _tr(context, 'Cargando...', 'Loading...') : 'v$_currentVersion',
             ),
           ],
         ),
@@ -1303,44 +1322,44 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Gestión financiera personal',
+                            _tr(context, 'Gestión financiera personal', 'Personal finance management'),
                             textAlign: TextAlign.center,
                             style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(
                                   color: Theme.of(dialogContext).colorScheme.primary,
                                 ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'MyFinc te ayuda a organizar tus finanzas en un solo lugar. Administra tus cuentas, registra ingresos, gastos y transferencias, consulta estadísticas y personaliza tus categorías. Su enfoque local-first mantiene tus datos financieros principalmente en el dispositivo.',
+                          Text(
+                            _tr(context, 'MyFinc te ayuda a organizar tus finanzas en un solo lugar. Administra tus cuentas, registra ingresos, gastos y transferencias, consulta estadísticas y personaliza tus categorías. Su enfoque local-first mantiene tus datos financieros principalmente en el dispositivo.', 'MyFinc helps you organize your finances in one place. Manage accounts, record income, expenses and transfers, review statistics, and customize categories. Its local-first approach keeps your financial data primarily on your device.'),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 18),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Funciones principales',
+                              _tr(context, 'Funciones principales', 'Key features'),
                               style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('• Cuentas, balances y movimientos financieros'),
-                                Text('• Estadísticas y categorías personalizadas'),
-                                Text('• Copias de seguridad y restauración'),
-                                Text('• Temas claro, oscuro y del sistema'),
-                                Text('• Comprobación de actualizaciones'),
+                                Text(_tr(context, '• Cuentas, balances y movimientos financieros', '• Accounts, balances, and transactions')),
+                                Text(_tr(context, '• Estadísticas y categorías personalizadas', '• Statistics and custom categories')),
+                                Text(_tr(context, '• Copias de seguridad y restauración', '• Backups and restore')),
+                                Text(_tr(context, '• Temas claro, oscuro y del sistema', '• Light, dark, and system themes')),
+                                Text(_tr(context, '• Comprobación de actualizaciones', '• Update checks')),
                               ],
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Versión ${packageInfo.version}',
+                            _tr(context, 'Versión ${packageInfo.version}', 'Version ${packageInfo.version}'),
                             style: Theme.of(dialogContext).textTheme.labelMedium,
                           ),
                         ],
@@ -1521,7 +1540,7 @@ class _CategoryManagerDialogState
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(_type == 'income' ? 'Nueva categoría de ingreso' : 'Nueva categoría de gasto'),
+        title: Text(_type == 'income' ? _tr(context, 'Nueva categoría de ingreso', 'New income category') : _tr(context, 'Nueva categoría de gasto', 'New expense category')),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -1556,7 +1575,7 @@ class _CategoryManagerDialogState
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error is AppException ? error.message : 'No se pudo agregar la categoría.')),
+          SnackBar(content: Text(error is AppException ? error.message : _tr(context, 'No se pudo agregar la categoría.', 'Could not add category.'))),
         );
       }
     } finally {
@@ -1591,7 +1610,7 @@ class _CategoryManagerDialogState
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error is AppException ? error.message : 'No se pudo eliminar la categoría.')),
+          SnackBar(content: Text(error is AppException ? error.message : _tr(context, 'No se pudo eliminar la categoría.', 'Could not delete category.'))),
         );
       }
     } finally {
@@ -1799,6 +1818,153 @@ class _SettingsTile extends StatelessWidget {
       trailing: trailing ??
           (onTap != null ? const Icon(Icons.chevron_right_rounded) : null),
       onTap: onTap,
+    );
+  }
+}
+
+class _LanguageChangeScreen extends StatefulWidget {
+  const _LanguageChangeScreen({
+    required this.languageCode,
+    required this.applyLanguage,
+  });
+
+  final String languageCode;
+  final Future<void> Function() applyLanguage;
+
+  @override
+  State<_LanguageChangeScreen> createState() => _LanguageChangeScreenState();
+}
+
+class _LanguageChangeScreenState extends State<_LanguageChangeScreen> {
+  int _stage = 0;
+  Object? _error;
+
+  bool get _isEnglish => widget.languageCode == 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _runTransition();
+  }
+
+  Future<void> _runTransition() async {
+    // Give the first loading message time to render before applying the locale.
+    await Future<void>.delayed(const Duration(milliseconds: 450));
+    try {
+      await widget.applyLanguage();
+      if (!mounted) return;
+      setState(() => _stage = 1);
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      setState(() => _stage = 2);
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = error);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final messages = _isEnglish
+        ? const ['Loading', 'Almost ready', 'Done, language changed successfully']
+        : const ['Cargando', 'Ya casi listo', 'Listo, idioma cambiado correctamente'];
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Icon(
+                      _error != null
+                          ? Icons.error_outline_rounded
+                          : _stage == 2
+                              ? Icons.check_rounded
+                              : Icons.translate_rounded,
+                      size: 44,
+                      color: scheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: Text(
+                      _error != null
+                          ? (_isEnglish ? 'Could not change language' : 'No se pudo cambiar el idioma')
+                          : messages[_stage],
+                      key: ValueKey('$_stage-$_error'),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  if (_error == null && _stage < 2)
+                    const SizedBox(
+                      width: 34,
+                      height: 34,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    )
+                  else
+                    Icon(
+                      _error != null ? Icons.info_outline_rounded : Icons.check_circle_rounded,
+                      size: 34,
+                      color: _error != null ? scheme.error : scheme.primary,
+                    ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      _isEnglish
+                          ? 'Please try again from Settings.'
+                          : 'Inténtalo de nuevo desde Configuración.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                      child: Text(_isEnglish ? 'Close' : 'Cerrar'),
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      minHeight: 5,
+                      value: _error != null ? null : (_stage + 1) / 3,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'MyFinc',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
