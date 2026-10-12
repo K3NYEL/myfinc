@@ -103,7 +103,7 @@ class _State extends ConsumerState<TransactionFormPage> {
     }
     if (categoriesState?.hasError ?? false) {
       return Scaffold(
-        appBar: AppBar(title: Text(_title)),
+        appBar: AppBar(title: Text(_title(isEnglish))),
         body: AsyncStateView(
           error: categoriesState!.error,
           onRetry: () => ref.invalidate(categoriesProvider(widget.kind)),
@@ -132,7 +132,7 @@ class _State extends ConsumerState<TransactionFormPage> {
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: Theme.of(context).textTheme.headlineMedium,
-            decoration: const InputDecoration(labelText: 'Monto (RD\$)'),
+            decoration: InputDecoration(labelText: isEnglish ? 'Amount (DOP)' : 'Monto (RD\$)'),
           ),
           const SizedBox(height: 12),
           _drop(
