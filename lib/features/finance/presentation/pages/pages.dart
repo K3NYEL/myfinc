@@ -378,7 +378,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
               children: [
                 TextField(
                   controller: name,
-                  decoration: const InputDecoration(labelText: _tr(context, 'Nombre', 'Name')),
+                  decoration: InputDecoration(labelText: _tr(context, 'Nombre', 'Name')),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
@@ -400,7 +400,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration:
-                      const InputDecoration(labelText: _tr(context, 'Balance inicial', 'Opening balance')),
+                      InputDecoration(labelText: _tr(context, 'Balance inicial', 'Opening balance')),
                 ),
               ],
             ),
@@ -579,7 +579,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                                   }
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text(_tr(context, 'ID copiado', 'ID copied'))),
+                                      SnackBar(content: Text(_tr(context, 'ID copiado', 'ID copied'))),
                                     );
                                   }
                                 },
@@ -608,7 +608,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                       await _loadProfile();
                       if (saved == true && mounted) {
                         messenger.showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(_tr(context, 'Personalización guardada y aplicada al perfil.', 'Profile customization saved and applied.')),
                           ),
                         );
