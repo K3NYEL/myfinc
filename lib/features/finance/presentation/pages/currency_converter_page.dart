@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../../../core/settings/app_preferences.dart';
 import '../../../../core/utils/currency_utils.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 /// Conversor informativo. Nunca modifica saldos ni transacciones guardados.
 class CurrencyConverterPage extends StatefulWidget {
   const CurrencyConverterPage({super.key});
@@ -37,6 +40,10 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     'TTD': 'Dólar trinitense',
     'VES': 'Bolívar venezolano',
   };
+
+  static const _englishCurrencies = <String, String>{'DOP':'Dominican peso','USD':'US dollar','EUR':'Euro','GBP':'British pound','CAD':'Canadian dollar','MXN':'Mexican peso','COP':'Colombian peso','ARS':'Argentine peso','BRL':'Brazilian real','JPY':'Japanese yen','CHF':'Swiss franc','CNY':'Chinese yuan','PEN':'Peruvian sol','CLP':'Chilean peso','CRC':'Costa Rican colón','GTQ':'Guatemalan quetzal','HNL':'Honduran lempira','JMD':'Jamaican dollar','TTD':'Trinidad and Tobago dollar','VES':'Venezuelan bolívar'};
+
+  String _currencyName(String code) => Localizations.localeOf(context).languageCode == 'en' ? (_englishCurrencies[code] ?? code) : (_currencies[code] ?? code);
 
   final _amountController = TextEditingController(text: '1');
   String _from = 'DOP';
@@ -88,8 +95,8 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
       if (!refreshed && convertDisplayAmount(1, from: 'DOP', to: code) == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.'),
+          SnackBar(
+            content: Text(_tr(context, 'No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.', 'No exchange rates are available. Connect to the internet and try again.')),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -101,7 +108,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     setState(() => _displayCurrency = code);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Moneda de visualización cambiada a ${currencyLabel(code)}'),
+        content: Text(_tr(context, 'Moneda de visualización cambiada a ${currencyLabel(code)}', 'Display currency changed to ${code}')),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -140,7 +147,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     } catch (_) {
       if (mounted) {
         setState(() {
-          _error = 'No se pudieron actualizar las tasas. Comprueba tu conexión e inténtalo de nuevo.';
+          _error = _tr(context, 'No se pudieron actualizar las tasas. Comprueba tu conexión e inténtalo de nuevo.', 'Could not update rates. Check your connection and try again.');
         });
       }
     } finally {
@@ -162,14 +169,14 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: Text('Seleccionar moneda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(_tr(context, 'Seleccionar moneda', 'Select currency'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             for (final entry in _currencies.entries)
               ListTile(
                 title: Text(entry.key),
-                subtitle: Text(entry.value),
+                subtitle: Text(_currencyName(entry.key)),
                 trailing: entry.key == selected ? const Icon(Icons.check_circle_rounded) : null,
                 onTap: () => Navigator.pop(context, entry.key),
               ),
@@ -206,10 +213,10 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     final scheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conversor de monedas'),
+        title: Text(_tr(context, 'Conversor de monedas', 'Currency converter')),
         actions: [
           IconButton(
-            tooltip: 'Actualizar tasas',
+            tooltip: _tr(context, 'Actualizar tasas', 'Refresh rates'),
             onPressed: _loading ? null : _loadRates,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -224,16 +231,16 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Conversión rápida', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                  Text(_tr(context, 'Conversión rápida', 'Quick conversion'), style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 6),
-                  Text('Consulta tasas de cambio actuales sin modificar tus cuentas ni movimientos.', style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                  Text(_tr(context, 'Consulta tasas de cambio actuales sin modificar tus cuentas ni movimientos.', 'Check current exchange rates without changing your accounts or transactions.'), style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: 24),
                   TextField(
                     controller: _amountController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      labelText: 'Cantidad',
+                      labelText: _tr(context, 'Cantidad', 'Amount'),
                       prefixIcon: const Icon(Icons.payments_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -247,7 +254,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('De'),
+                              Text(_tr(context, 'De', 'From')),
                               const SizedBox(height: 4),
                               Text(_from, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                               Text(_currencies[_from] ?? _from, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
@@ -266,7 +273,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('A'),
+                              Text(_tr(context, 'A', 'To')),
                               const SizedBox(height: 4),
                               Text(_to, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                               Text(_currencies[_to] ?? _to, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
@@ -288,7 +295,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                         FilledButton.tonalIcon(
                           onPressed: _loadRates,
                           icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Reintentar'),
+                          label: Text(_tr(context, 'Reintentar', 'Retry')),
                         ),
                       ],
                     )
@@ -303,7 +310,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Resultado estimado', style: TextStyle(color: scheme.onPrimaryContainer)),
+                          Text(_tr(context, 'Resultado estimado', 'Estimated result'), style: TextStyle(color: scheme.onPrimaryContainer)),
                           const SizedBox(height: 6),
                           Text(
                             _converted == null ? '—' : '${_format(_converted!)} $_to',
@@ -389,11 +396,11 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
           const SizedBox(height: 14),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('Tipo de cambio informativo'),
+            title: Text(_tr(context, 'Tipo de cambio informativo', 'Informational exchange rate')),
             subtitle: Text(
               _updatedAt == null
-                  ? 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.'
-                  : 'Última actualización del proveedor: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.',
+                  ? _tr(context, 'Las tasas pueden variar y el proveedor puede actualizarlas periódicamente.', 'Rates may vary and the provider may update them periodically.')
+                  : _tr(context, 'Última actualización del proveedor: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.', 'Provider last updated: ${MaterialLocalizations.of(context).formatMediumDate(_updatedAt!)}.'),
             ),
           ),
           const SizedBox(height: 8),

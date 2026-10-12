@@ -5,6 +5,10 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/utils/amount_parser.dart';
 import '../../../../shared/widgets/async_state_view.dart';
 import '../providers.dart';
+import '../../../../app/settings_provider.dart';
+
+String _tr(BuildContext context, String es, String en) =>
+    Localizations.localeOf(context).languageCode == 'en' ? en : es;
 
 class TransactionFormPage extends ConsumerStatefulWidget {
   final String kind; // income | expense | transfer
@@ -36,13 +40,13 @@ class _State extends ConsumerState<TransactionFormPage> {
       final availableAccounts = ref.read(accountsProvider).value ?? [];
       final accountId = _acc ?? (availableAccounts.isNotEmpty ? availableAccounts.first.id : null);
       if (accountId == null) {
-        throw const AppException('No hay una cuenta disponible. Crea o restaura tu cuenta e inténtalo de nuevo.');
+        throw AppException(_tr(context, 'No hay una cuenta disponible. Crea o restaura tu cuenta e inténtalo de nuevo.', 'No account is available. Create or restore an account and try again.'));
       }
       if (amount <= 0) {
-        throw const AppException('Escribe un monto válido mayor que cero.');
+        throw AppException(_tr(context, 'Escribe un monto válido mayor que cero.', 'Enter a valid amount greater than zero.'));
       }
       if (_isTransfer) {
-        if (_dest == null) throw const AppException('Elige la cuenta destino.');
+        if (_dest == null) throw AppException(_tr(context, 'Elige la cuenta destino.', 'Choose the destination account.'));
         await repo.addTransfer(accountId, _dest!, amount, _desc.text);
       } else {
         await repo.addTransaction(
@@ -57,7 +61,7 @@ class _State extends ConsumerState<TransactionFormPage> {
       error = e.message;
     } catch (e) {
       debugPrint('Error al guardar: $e');
-      error = 'No pudimos guardar el movimiento. Inténtalo nuevamente.';
+      error = _tr(context, 'No pudimos guardar el movimiento. Inténtalo nuevamente.', 'We could not save the transaction. Please try again.');
     }
     if (!mounted) return;
     setState(() => _busy = false);
@@ -84,12 +88,13 @@ class _State extends ConsumerState<TransactionFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isEnglish = ref.watch(settingsProvider).languageCode == 'en';
     final accountsState = ref.watch(accountsProvider);
     final categoriesState =
         _isTransfer ? null : ref.watch(categoriesProvider(widget.kind));
     if (accountsState.hasError) {
       return Scaffold(
-        appBar: AppBar(title: Text(_title)),
+        appBar: AppBar(title: Text(_title(isEnglish))),
         body: AsyncStateView(
           error: accountsState.error,
           onRetry: () => ref.invalidate(accountsProvider),
@@ -98,7 +103,7 @@ class _State extends ConsumerState<TransactionFormPage> {
     }
     if (categoriesState?.hasError ?? false) {
       return Scaffold(
-        appBar: AppBar(title: Text(_title)),
+        appBar: AppBar(title: Text(_title(isEnglish))),
         body: AsyncStateView(
           error: categoriesState!.error,
           onRetry: () => ref.invalidate(categoriesProvider(widget.kind)),
@@ -119,7 +124,7 @@ class _State extends ConsumerState<TransactionFormPage> {
     final selectedCategoryId = _cat ?? (categories.isNotEmpty ? categories.first.id : null);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_title)),
+      appBar: AppBar(title: Text(_title(isEnglish))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -127,25 +132,25 @@ class _State extends ConsumerState<TransactionFormPage> {
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: Theme.of(context).textTheme.headlineMedium,
-            decoration: const InputDecoration(labelText: 'Monto (RD\$)'),
+            decoration: InputDecoration(labelText: isEnglish ? 'Amount (DOP)' : 'Monto (RD\$)'),
           ),
           const SizedBox(height: 12),
           _drop(
-            _isTransfer ? 'Cuenta origen' : 'Cuenta',
+            _isTransfer ? (isEnglish ? 'Source account' : 'Cuenta origen') : (isEnglish ? 'Account' : 'Cuenta'),
             selectedAccountId,
             accountItems,
             (value) => setState(() => _acc = value),
           ),
           if (_isTransfer)
             _drop(
-              'Cuenta destino',
+              isEnglish ? 'Destination account' : 'Cuenta destino',
               _dest,
               accountItems,
               (value) => setState(() => _dest = value),
             ),
           if (!_isTransfer)
             _drop(
-              'Categoría',
+              isEnglish ? 'Category' : 'Categoría',
               selectedCategoryId,
               [
                 for (final category in categories)
@@ -159,7 +164,7 @@ class _State extends ConsumerState<TransactionFormPage> {
           TextField(
             controller: _desc,
             decoration:
-                const InputDecoration(labelText: 'Descripción (opcional)'),
+                InputDecoration(labelText: isEnglish ? 'Description (optional)' : 'Descripción (opcional)'),
           ),
           const SizedBox(height: 20),
           FilledButton(
@@ -172,7 +177,7 @@ class _State extends ConsumerState<TransactionFormPage> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Guardar'),
+                  : Text(isEnglish ? 'Save' : 'Guardar'),
             ),
           ),
         ],
@@ -180,9 +185,9 @@ class _State extends ConsumerState<TransactionFormPage> {
     );
   }
 
-  String get _title => {
-        'income': 'Nuevo ingreso',
-        'expense': 'Nuevo gasto',
-        'transfer': 'Transferencia',
+  String _title(bool isEnglish) => {
+        'income': isEnglish ? 'New income' : 'Nuevo ingreso',
+        'expense': isEnglish ? 'New expense' : 'Nuevo gasto',
+        'transfer': isEnglish ? 'Transfer' : 'Transferencia',
       }[widget.kind]!;
 }

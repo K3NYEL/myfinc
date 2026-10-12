@@ -87,18 +87,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         icon: const Icon(Icons.notifications_active_outlined),
-        title: const Text('Activa las notificaciones'),
-        content: const Text(
-          'Permite las notificaciones para preparar el dispositivo para avisos de MyFinc. Puedes cambiar este permiso en cualquier momento desde la configuración del teléfono.',
+        title: Text(ref.read(settingsProvider).languageCode == 'en' ? 'Enable notifications' : 'Activa las notificaciones'),
+        content: Text(
+          (ref.read(settingsProvider).languageCode == 'en' ? 'Allow notifications to receive MyFinc updates. You can change this permission at any time in your phone settings.' : 'Permite las notificaciones para recibir avisos de MyFinc. Puedes cambiar este permiso en cualquier momento desde la configuración del teléfono.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Ahora no'),
+            child: Text(ref.read(settingsProvider).languageCode == 'en' ? 'Not now' : 'Ahora no'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Continuar'),
+            child: Text(ref.read(settingsProvider).languageCode == 'en' ? 'Continue' : 'Continuar'),
           ),
         ],
       ),
@@ -109,7 +109,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     } on PlatformException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo solicitar el permiso. Puedes revisarlo en Configuración.')),
+        SnackBar(content: Text(ref.read(settingsProvider).languageCode == 'en' ? 'Could not request permission. You can review it in Settings.' : 'No se pudo solicitar el permiso. Puedes revisarlo en Configuración.')),
       );
     }
   }
@@ -179,9 +179,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
             IconButton(
-              tooltip: 'Configuración',
+              tooltip: isEnglish ? 'Settings' : 'Configuración',
               onPressed: () => context.push('/settings'),
               icon: const Icon(Icons.settings_outlined),
+            ),
+            IconButton(
+              tooltip: isEnglish ? 'Calculator' : 'Calculadora',
+              onPressed: () => context.push('/calculator'),
+              icon: const Icon(Icons.calculate_outlined),
             ),
           ],
         ),
@@ -200,7 +205,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             children: [
               Expanded(
                 child: DashboardStat(
-                  'Ingresos',
+                  isEnglish ? 'Income' : 'Ingresos',
                   summary.income,
                   theme.brightness == Brightness.dark
                       ? AppColors.success
@@ -209,7 +214,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
               Expanded(
                 child: DashboardStat(
-                  'Gastos',
+                  isEnglish ? 'Expenses' : 'Gastos',
                   summary.expense,
                   theme.colorScheme.error,
                 ),
@@ -218,7 +223,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Cuentas', style: theme.textTheme.titleMedium),
+        Text(isEnglish ? 'Accounts' : 'Cuentas', style: theme.textTheme.titleMedium),
         AsyncValueView(
           state: accountsState,
           onRetry: () => ref.invalidate(accountsProvider),
@@ -232,7 +237,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           data: (accounts) => accounts.isEmpty
               ? Text(
-                  'Crea tu primera cuenta en la pestaña Cuentas.',
+                  isEnglish ? 'Create your first account in the Accounts tab.' : 'Crea tu primera cuenta en la pestaña Cuentas.',
                   style: mutedStyle,
                 )
               : Column(
@@ -247,7 +252,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
         ),
         const SizedBox(height: 16),
-        Text('Movimientos recientes', style: theme.textTheme.titleMedium),
+        Text(isEnglish ? 'Recent transactions' : 'Movimientos recientes', style: theme.textTheme.titleMedium),
         AsyncValueView(
           state: movementsState,
           onRetry: () => ref.invalidate(movementsProvider),
@@ -262,7 +267,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
           data: (movements) => movements.isEmpty
-              ? Text('Aún no hay movimientos.', style: mutedStyle)
+              ? Text(isEnglish ? 'No transactions yet.' : 'Aún no hay movimientos.', style: mutedStyle)
               : Column(
                   children: [
                     for (final movement in movements.take(5))

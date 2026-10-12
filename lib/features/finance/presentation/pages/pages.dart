@@ -13,6 +13,9 @@ import '../../../../shared/widgets/myfinc_skeleton.dart';
 import '../../../auth/presentation/session_provider.dart';
 import '../providers.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 TextStyle _muted(BuildContext context) => TextStyle(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
@@ -75,17 +78,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Movimientos', style: theme.textTheme.headlineSmall?.copyWith(
+                        Text(_tr(context, 'Movimientos', 'Transactions'), style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                         )),
                         const SizedBox(height: 3),
-                        Text('${all.length} movimientos cargados',
+                        Text(_tr(context, '${all.length} movimientos cargados', '${all.length} transactions loaded'),
                           style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Conversor de monedas',
+                    tooltip: _tr(context, 'Conversor de monedas', 'Currency converter'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const CurrencyConverterPage(),
@@ -94,7 +97,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     icon: const Icon(Icons.currency_exchange_rounded),
                   ),
                   IconButton(
-                    tooltip: 'Actualizar movimientos',
+                    tooltip: _tr(context, 'Actualizar movimientos', 'Refresh transactions'),
                     onPressed: () => ref.invalidate(movementsProvider),
                     icon: const Icon(Icons.refresh_rounded),
                   ),
@@ -106,10 +109,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 onChanged: (value) => setState(() => _query = value),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Buscar por concepto o detalle',
+                  hintText: _tr(context, 'Buscar por concepto o detalle', 'Search by description or details'),
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: _query.isEmpty ? null : IconButton(
-                    tooltip: 'Limpiar búsqueda',
+                    tooltip: _tr(context, 'Limpiar búsqueda', 'Clear search'),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _query = '');
@@ -128,7 +131,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 children: [
                   Expanded(
                     child: _MovementSummaryCard(
-                      label: 'Ingresos recientes',
+                      label: _tr(context, 'Ingresos recientes', 'Recent income'),
                       amount: income,
                       icon: Icons.south_west_rounded,
                       color: const Color(0xFF16A34A),
@@ -137,7 +140,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _MovementSummaryCard(
-                      label: 'Gastos recientes',
+                      label: _tr(context, 'Gastos recientes', 'Recent expenses'),
                       amount: expenses,
                       icon: Icons.north_east_rounded,
                       color: scheme.error,
@@ -204,7 +207,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               setState(() => _query = '');
                             },
                             icon: const Icon(Icons.clear_rounded),
-                            label: const Text('Limpiar búsqueda'),
+                            label: Text(_tr(context, 'Limpiar búsqueda', 'Clear search')),
                           ),
                         ],
                       ],
@@ -369,13 +372,13 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
         context: c,
         builder: (_) => StatefulBuilder(
           builder: (ctx, set) => AlertDialog(
-            title: const Text('Nueva cuenta'),
+            title: Text(_tr(context, 'Nueva cuenta', 'New account')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: name,
-                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  decoration: InputDecoration(labelText: _tr(context, 'Nombre', 'Name')),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
@@ -383,12 +386,12 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   onChanged: (value) {
                     if (value != null) set(() => type = value);
                   },
-                  items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Efectivo')),
-                    DropdownMenuItem(value: 'bank', child: Text('Banco')),
-                    DropdownMenuItem(value: 'savings', child: Text('Ahorros')),
-                    DropdownMenuItem(value: 'card', child: Text('Tarjeta')),
-                    DropdownMenuItem(value: 'other', child: Text('Otra')),
+                  items: [
+                    DropdownMenuItem(value: 'cash', child: Text(_tr(context, 'Efectivo', 'Cash'))),
+                    DropdownMenuItem(value: 'bank', child: Text(_tr(context, 'Banco', 'Bank'))),
+                    DropdownMenuItem(value: 'savings', child: Text(_tr(context, 'Ahorros', 'Savings'))),
+                    DropdownMenuItem(value: 'card', child: Text(_tr(context, 'Tarjeta', 'Card'))),
+                    DropdownMenuItem(value: 'other', child: Text(_tr(context, 'Otra', 'Other'))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -397,14 +400,14 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration:
-                      const InputDecoration(labelText: 'Balance inicial'),
+                      InputDecoration(labelText: _tr(context, 'Balance inicial', 'Opening balance')),
                 ),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
+                child: Text(_tr(context, 'Cancelar', 'Cancel')),
               ),
               FilledButton(
                 onPressed: () async {
@@ -424,7 +427,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                     }
                   }
                 },
-                child: const Text('Guardar'),
+                child: Text(_tr(context, 'Guardar', 'Save')),
               ),
             ],
           ),
@@ -465,9 +468,9 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Mis cuentas', style: Theme.of(context).textTheme.titleLarge),
+            Text(_tr(context, 'Mis cuentas', 'My accounts'), style: Theme.of(context).textTheme.titleLarge),
             IconButton(
-              tooltip: 'Crear cuenta',
+              tooltip: _tr(context, 'Crear cuenta', 'Create account'),
               onPressed: () => _new(context, ref),
               icon: const Icon(Icons.add),
             ),
@@ -531,12 +534,12 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                       showDialog<void>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
-                          title: const Text('Detalles de la cuenta'),
+                          title: Text(_tr(context, 'Detalles de la cuenta', 'Account details')),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('ID de usuario', style: _muted(dialogContext)),
+                              Text(_tr(context, 'ID de usuario', 'User ID'), style: _muted(dialogContext)),
                               const SizedBox(height: 4),
                               SelectableText(
                                 user == null
@@ -550,14 +553,14 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                               _profileDetail(
                                 dialogContext,
                                 icon: Icons.event_outlined,
-                                label: 'Cuenta creada',
+                                label: _tr(context, 'Cuenta creada', 'Account created'),
                                 value: formatDateTime(user?.createdAt),
                               ),
                               const SizedBox(height: 8),
                               _profileDetail(
                                 dialogContext,
                                 icon: Icons.login_rounded,
-                                label: 'Último acceso',
+                                label: _tr(context, 'Último acceso', 'Last sign-in'),
                                 value: formatDateTime(user?.lastLogin),
                               ),
                             ],
@@ -576,23 +579,23 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                                   }
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('ID copiado')),
+                                      SnackBar(content: Text(_tr(context, 'ID copiado', 'ID copied'))),
                                     );
                                   }
                                 },
                                 icon: const Icon(Icons.copy_rounded),
-                                label: const Text('Copiar ID'),
+                                label: Text(_tr(context, 'Copiar ID', 'Copy ID')),
                               ),
                             TextButton(
                               onPressed: () => Navigator.of(dialogContext).pop(),
-                              child: const Text('Cerrar'),
+                              child: Text(_tr(context, 'Cerrar', 'Close')),
                             ),
                           ],
                         ),
                       );
                     },
                     icon: const Icon(Icons.info_outline_rounded),
-                    label: const Text('Ver detalles'),
+                    label: Text(_tr(context, 'Ver detalles', 'View details')),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -605,14 +608,14 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                       await _loadProfile();
                       if (saved == true && mounted) {
                         messenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Personalización guardada y aplicada al perfil.'),
+                          SnackBar(
+                            content: Text(_tr(context, 'Personalización guardada y aplicada al perfil.', 'Profile customization saved and applied.')),
                           ),
                         );
                       }
                     },
                     icon: const Icon(Icons.manage_accounts_outlined),
-                    label: const Text('Personalizar perfil'),
+                    label: Text(_tr(context, 'Personalizar perfil', 'Customize profile')),
                   ),
                 ),
               ],
@@ -624,7 +627,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
-              child: Text('Todavía no tienes cuentas.', style: _muted(context)),
+              child: Text(_tr(context, 'Todavía no tienes cuentas.', 'You do not have any accounts yet.'), style: _muted(context)),
             ),
           ),
         for (final account in accountList)
@@ -639,7 +642,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Total', style: _muted(context)),
+            Text(_tr(context, 'Total', 'Total'), style: _muted(context)),
             Text(money(total), style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
@@ -706,19 +709,19 @@ class StatisticsPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Estadísticas', style: theme.textTheme.headlineSmall?.copyWith(
+                    Text(_tr(context, 'Estadísticas', 'Statistics'), style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     )),
                     const SizedBox(height: 4),
                     Text(
-                      'Resumen de este mes',
+                      _tr(context, 'Resumen de este mes', "This month's summary"),
                       style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                tooltip: 'Actualizar estadísticas',
+                tooltip: _tr(context, 'Actualizar estadísticas', 'Refresh statistics'),
                 onPressed: () {
                   ref.invalidate(summaryProvider);
                   ref.invalidate(byCategoryProvider);
@@ -773,7 +776,7 @@ class StatisticsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    balance >= 0 ? 'Vas por encima de tus gastos' : 'Tus gastos superan tus ingresos',
+                    balance >= 0 ? _tr(context, 'Vas por encima de tus gastos', 'You are spending less than you earn') : _tr(context, 'Tus gastos superan tus ingresos', 'Your expenses exceed your income'),
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
                   ),
                 ],
@@ -785,7 +788,7 @@ class StatisticsPage extends ConsumerWidget {
             children: [
               Expanded(
                 child: _StatisticsMetricCard(
-                  label: 'Ingresos',
+                  label: _tr(context, 'Ingresos', 'Income'),
                   value: income,
                   icon: Icons.trending_up_rounded,
                   color: const Color(0xFF16A34A),
@@ -794,7 +797,7 @@ class StatisticsPage extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatisticsMetricCard(
-                  label: 'Gastos',
+                  label: _tr(context, 'Gastos', 'Expenses'),
                   value: expenses,
                   icon: Icons.trending_down_rounded,
                   color: scheme.error,
@@ -809,7 +812,7 @@ class StatisticsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ingresos frente a gastos', style: theme.textTheme.titleMedium?.copyWith(
+                  Text(_tr(context, 'Ingresos frente a gastos', 'Income vs. expenses'), style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   )),
                   const SizedBox(height: 6),
@@ -837,11 +840,11 @@ class StatisticsPage extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _LegendItem(color: const Color(0xFF16A34A), label: 'Ingresos', value: money(income)),
+                        child: _LegendItem(color: const Color(0xFF16A34A), label: _tr(context, 'Ingresos', 'Income'), value: money(income)),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _LegendItem(color: scheme.error, label: 'Gastos', value: money(expenses)),
+                        child: _LegendItem(color: scheme.error, label: _tr(context, 'Gastos', 'Expenses'), value: money(expenses)),
                       ),
                     ],
                   ),
@@ -853,18 +856,18 @@ class StatisticsPage extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Gastos por categoría', style: theme.textTheme.titleLarge?.copyWith(
+                child: Text(_tr(context, 'Gastos por categoría', 'Expenses by category'), style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                 )),
               ),
               if (categoryTotals.isNotEmpty)
-                Text('${categoryTotals.length} categorías',
+                Text(_tr(context, '${categoryTotals.length} categorías', '${categoryTotals.length} categories'),
                   style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Dónde se concentra tu dinero',
+            _tr(context, 'Dónde se concentra tu dinero', 'Where your money goes'),
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 10),
@@ -876,10 +879,10 @@ class StatisticsPage extends ConsumerWidget {
                   children: [
                     Icon(Icons.pie_chart_outline_rounded, size: 38, color: scheme.onSurfaceVariant),
                     const SizedBox(height: 10),
-                    Text('Aún no hay gastos por categoría', style: theme.textTheme.titleSmall),
+                    Text(_tr(context, 'Aún no hay gastos por categoría', 'No expenses by category yet'), style: theme.textTheme.titleSmall),
                     const SizedBox(height: 5),
                     Text(
-                      'Cuando registres gastos, aquí verás cómo se distribuyen.',
+                      _tr(context, 'Cuando registres gastos, aquí verás cómo se distribuyen.', 'Once you record expenses, you will see how they are distributed here.'),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                     ),
