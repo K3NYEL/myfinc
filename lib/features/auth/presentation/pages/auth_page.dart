@@ -8,6 +8,9 @@ import '../../domain/user.dart';
 import '../../../../shared/widgets/myfinc_logo.dart';
 import '../session_provider.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
 
@@ -78,7 +81,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
     if (_isRegistering && password != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden.')),
+        const SnackBar(content: Text(_tr(context, 'Las contraseñas no coinciden.', 'Passwords do not match.'))),
       );
       return;
     }
@@ -117,7 +120,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text(_tr(context, 'Error: $e', 'Error: $e')),
           duration: const Duration(seconds: 8),
         ),
       );
@@ -200,7 +203,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                             ? null
                             : () => context.go('/settings/cloud-account'),
                         icon: const Icon(Icons.cloud_sync_outlined),
-                        label: const Text('Vincular cuenta remota'),
+                        label: Text(_tr(context, 'Vincular cuenta remota', 'Link remote account')),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -270,7 +273,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       controller: _firstNameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
-                        labelText: 'Nombres',
+                        labelText: _tr(context, 'Nombres', 'First name'),
                         prefixIcon: Icon(Icons.person_outline),
                         border: OutlineInputBorder(),
                       ),
@@ -280,7 +283,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       controller: _lastNameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
-                        labelText: 'Apellidos',
+                        labelText: _tr(context, 'Apellidos', 'Last name'),
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
                       ),
@@ -301,7 +304,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _submit(),
                       decoration: InputDecoration(
-                        labelText: 'Confirmar contraseña',
+                        labelText: _tr(context, 'Confirmar contraseña', 'Confirm password'),
                         prefixIcon: const Icon(Icons.lock_reset_outlined),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
@@ -322,7 +325,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       controller: _firstNameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
-                        labelText: 'Nombres',
+                        labelText: _tr(context, 'Nombres', 'First name'),
                         hintText: 'Escribe tus nombres',
                         prefixIcon: Icon(Icons.person_outline),
                         border: OutlineInputBorder(),
@@ -333,7 +336,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       controller: _lastNameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
-                        labelText: 'Apellidos',
+                        labelText: _tr(context, 'Apellidos', 'Last name'),
                         hintText: 'Escribe tus apellidos',
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
@@ -423,7 +426,7 @@ class _PasswordField extends StatelessWidget {
       textInputAction: textInputAction,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
-        labelText: 'Contraseña',
+        labelText: _tr(context, 'Contraseña', 'Password'),
         prefixIcon: const Icon(Icons.lock_outline),
         border: const OutlineInputBorder(),
         suffixIcon: IconButton(
