@@ -9,7 +9,7 @@ on:
       release_tag:
         description: "Existing release tag to build and attach APKs to (for example v0.1.5)"
         required: true
-        default: "v0.1.5"
+        default: ""
         type: string
 
 permissions:
