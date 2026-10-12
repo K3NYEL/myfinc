@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../session_provider.dart';
+import '../../../../app/settings_provider.dart';
 
 class ProfileCustomizationPage extends ConsumerStatefulWidget {
   const ProfileCustomizationPage({super.key});
@@ -72,7 +73,7 @@ class _ProfileCustomizationPageState
     final name = _displayNameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('El nombre visible no puede estar vacío.')),
+        SnackBar(content: Text(Localizations.localeOf(context).languageCode == 'en' ? 'Display name cannot be empty.' : 'El nombre visible no puede estar vacío.')),
       );
       return;
     }
@@ -88,7 +89,7 @@ class _ProfileCustomizationPageState
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar la personalización.')),
+          SnackBar(content: Text(Localizations.localeOf(context).languageCode == 'en' ? 'Could not save profile customization.' : 'No se pudo guardar la personalización.')),
         );
       }
     } finally {
@@ -106,14 +107,15 @@ class _ProfileCustomizationPageState
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(sessionProvider);
+    final isEnglish = ref.watch(settingsProvider).languageCode == 'en';
     final theme = Theme.of(context);
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Personalizar perfil')),
-        body: const Center(child: Text('Inicia sesión para editar tu perfil.')),
+        appBar: AppBar(title: Text(isEnglish ? 'Customize profile' : 'Personalizar perfil')),
+        body: Center(child: Text(isEnglish ? 'Sign in to edit your profile.' : 'Inicia sesión para editar tu perfil.')),
       );
     }
 
@@ -158,7 +160,7 @@ class _ProfileCustomizationPageState
               ),
             ),
             const SizedBox(height: 24),
-            Text('Información del perfil', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(isEnglish ? 'Profile information' : 'Información del perfil', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
             TextField(
               controller: _displayNameController,
@@ -167,7 +169,7 @@ class _ProfileCustomizationPageState
               onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
                 labelText: 'Nombre visible',
-                hintText: '¿Cómo quieres que te llamen?',
+                hintText: isEnglish ? 'What should we call you?' : '¿Cómo quieres que te llamen?',
                 prefixIcon: Icon(Icons.badge_outlined),
                 border: OutlineInputBorder(),
               ),
@@ -181,7 +183,7 @@ class _ProfileCustomizationPageState
               textCapitalization: TextCapitalization.sentences,
               onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
-                labelText: 'Descripción (opcional)',
+                labelText: isEnglish ? 'Bio (optional)' : 'Descripción (opcional)',
                 hintText: 'Una frase sobre ti',
                 prefixIcon: Icon(Icons.short_text_rounded),
                 border: OutlineInputBorder(),
@@ -237,11 +239,13 @@ class _ProfileCustomizationPageState
               icon: _saving
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.save_outlined),
-              label: Text(_saving ? 'Guardando…' : 'Guardar personalización'),
+              label: Text(_saving ? (isEnglish ? 'Saving…' : 'Guardando…') : (isEnglish ? 'Save profile' : 'Guardar personalización')),
             ),
             const SizedBox(height: 10),
             Text(
-              'Estos cambios son locales a esta instalación y no modifican tus datos financieros ni tu nombre de acceso.',
+              isEnglish
+                  ? 'These changes are stored on this installation and do not affect your financial data or sign-in name.'
+                  : 'Estos cambios son locales a esta instalación y no modifican tus datos financieros ni tu nombre de acceso.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
