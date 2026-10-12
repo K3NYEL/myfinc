@@ -190,12 +190,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         const SizedBox(height: 12),
                         Text(
                           normalizedQuery.isNotEmpty
-                              ? 'No encontramos movimientos con esa búsqueda.'
+                              ? _tr(context, 'No encontramos movimientos con esa búsqueda.', 'No transactions matched your search.')
                               : filter == 'all'
-                                  ? 'Aún no hay movimientos.'
+                                  ? _tr(context, 'Aún no hay movimientos.', 'No transactions yet.')
                                   : filter == 'income'
-                                      ? 'Todavía no hay ingresos registrados.'
-                                      : 'Todavía no hay gastos registrados.',
+                                      ? _tr(context, 'Todavía no hay ingresos registrados.', 'No income recorded yet.')
+                                      : _tr(context, 'Todavía no hay gastos registrados.', 'No expenses recorded yet.'),
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                         ),
@@ -817,7 +817,7 @@ class StatisticsPage extends ConsumerWidget {
                   )),
                   const SizedBox(height: 6),
                   Text(
-                    'Comparación de los importes registrados este mes',
+                    _tr(context, 'Comparación de los importes registrados este mes', 'Comparison of amounts recorded this month'),
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
