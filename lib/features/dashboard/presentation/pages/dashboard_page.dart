@@ -88,7 +88,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       builder: (dialogContext) => AlertDialog(
         icon: const Icon(Icons.notifications_active_outlined),
         title: Text(ref.read(settingsProvider).languageCode == 'en' ? 'Enable notifications' : 'Activa las notificaciones'),
-        content: const Text(
+        content: Text(
           (ref.read(settingsProvider).languageCode == 'en' ? 'Allow notifications to receive MyFinc updates. You can change this permission at any time in your phone settings.' : 'Permite las notificaciones para recibir avisos de MyFinc. Puedes cambiar este permiso en cualquier momento desde la configuración del teléfono.'),
         ),
         actions: [
