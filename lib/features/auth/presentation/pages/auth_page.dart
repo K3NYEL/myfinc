@@ -375,11 +375,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                   if (_hasRememberedUser) ...[
                     TextButton(
                       onPressed: _isLoading || _isLoadingRememberedUser ? null : _changeAccount,
-                      child: const Text('Usar otra cuenta'),
+                      child: Text(_tr(context, 'Usar otra cuenta', 'Use another account')),
                     ),
                     TextButton(
                       onPressed: _isLoading || _isLoadingRememberedUser ? null : _toggleMode,
-                      child: const Text('Crear una cuenta nueva'),
+                      child: Text(_tr(context, 'Crear una cuenta nueva', 'Create a new account')),
                     ),
                   ] else
                     TextButton(
