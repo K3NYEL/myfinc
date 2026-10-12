@@ -161,7 +161,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   controller: controller,
                   autofocus: true,
                   onChanged: (_) => setDialogState(() {}),
-                  decoration: const InputDecoration(labelText: _tr(context, 'Confirmación', 'Confirmation'), border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: _tr(context, 'Confirmación', 'Confirmation'), border: OutlineInputBorder()),
                 ),
               ],
             ),
@@ -895,7 +895,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     controller: controller,
                     autofocus: true,
                     onChanged: (_) => setDialogState(() {}),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: _tr(context, 'Confirmación', 'Confirmation'),
                       border: OutlineInputBorder(),
                     ),
@@ -1527,7 +1527,7 @@ class _CategoryManagerDialogState
           autofocus: true,
           maxLength: 40,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: _tr(context, 'Nombre', 'Name'),
             hintText: _tr(context, 'Ej. Salario o Transporte', 'e.g. Salary or Transport'),
             border: OutlineInputBorder(),
