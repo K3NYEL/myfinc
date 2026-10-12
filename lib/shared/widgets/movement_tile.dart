@@ -18,24 +18,25 @@ class MovementTile extends StatelessWidget {
         : '${MaterialLocalizations.of(context).formatShortDate(parsedDate)} · '
             '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(parsedDate))}';
     final subtitle = [m.subtitle, dateLabel].where((part) => part.isNotEmpty).join(' · ');
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     final (icon, color, sign, label) = switch (m.kind) {
       'income' => (
           Icons.south_west_rounded,
           const Color(0xFF16A34A),
           '+',
-          'Ingreso',
+          isEnglish ? 'Income' : 'Ingreso',
         ),
       'expense' => (
           Icons.north_east_rounded,
           scheme.error,
           '−',
-          'Gasto',
+          isEnglish ? 'Expense' : 'Gasto',
         ),
       _ => (
           Icons.swap_horiz_rounded,
           scheme.primary,
           '',
-          'Movimiento',
+          isEnglish ? 'Transaction' : 'Movimiento',
         ),
     };
 
