@@ -142,8 +142,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     await _showUpdateMessage(
       title: _tr(context, 'Copia automática actualizada', 'Automatic backup updated'),
       message: selected == 'disabled'
-          ? 'La creación automática de copias quedó desactivada.'
-          : 'MyFinc intentará crear una copia cada ${selected == 'daily' ? '24 horas' : '7 días'} al iniciar sesión. Si no se puede guardar, el inicio de sesión seguirá funcionando y se volverá a intentar en el siguiente inicio.',
+          ? _tr(context, 'La creación automática de copias quedó desactivada.', 'Automatic backups have been disabled.')
+          : _tr(context, 'MyFinc intentará crear una copia cada ${selected == 'daily' ? '24 horas' : '7 días'} al iniciar sesión. Si no se puede guardar, el inicio de sesión seguirá funcionando y se volverá a intentar en el siguiente inicio.', 'MyFinc will try to create a backup every ${selected == 'daily' ? '24 hours' : '7 days'} at sign-in. If saving fails, sign-in will continue normally and the backup will be retried next time.'),
       icon: Icons.backup_outlined,
     );
   }
@@ -1330,8 +1330,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'MyFinc te ayuda a organizar tus finanzas en un solo lugar. Administra tus cuentas, registra ingresos, gastos y transferencias, consulta estadísticas y personaliza tus categorías. Su enfoque local-first mantiene tus datos financieros principalmente en el dispositivo.',
+                          Text(
+                            _tr(context, 'MyFinc te ayuda a organizar tus finanzas en un solo lugar. Administra tus cuentas, registra ingresos, gastos y transferencias, consulta estadísticas y personaliza tus categorías. Su enfoque local-first mantiene tus datos financieros principalmente en el dispositivo.', 'MyFinc helps you organize your finances in one place. Manage accounts, record income, expenses and transfers, review statistics, and customize categories. Its local-first approach keeps your financial data primarily on your device.'),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 18),
@@ -1345,16 +1345,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('• Cuentas, balances y movimientos financieros'),
-                                Text('• Estadísticas y categorías personalizadas'),
-                                Text('• Copias de seguridad y restauración'),
-                                Text('• Temas claro, oscuro y del sistema'),
-                                Text('• Comprobación de actualizaciones'),
+                                Text(_tr(context, '• Cuentas, balances y movimientos financieros', '• Accounts, balances, and transactions')),
+                                Text(_tr(context, '• Estadísticas y categorías personalizadas', '• Statistics and custom categories')),
+                                Text(_tr(context, '• Copias de seguridad y restauración', '• Backups and restore')),
+                                Text(_tr(context, '• Temas claro, oscuro y del sistema', '• Light, dark, and system themes')),
+                                Text(_tr(context, '• Comprobación de actualizaciones', '• Update checks')),
                               ],
                             ),
                           ),
