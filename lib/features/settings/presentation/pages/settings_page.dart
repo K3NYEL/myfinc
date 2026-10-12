@@ -1540,7 +1540,7 @@ class _CategoryManagerDialogState
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(_type == 'income' ? 'Nueva categoría de ingreso' : 'Nueva categoría de gasto'),
+        title: Text(_type == 'income' ? _tr(context, 'Nueva categoría de ingreso', 'New income category') : _tr(context, 'Nueva categoría de gasto', 'New expense category')),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -1575,7 +1575,7 @@ class _CategoryManagerDialogState
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error is AppException ? error.message : 'No se pudo agregar la categoría.')),
+          SnackBar(content: Text(error is AppException ? error.message : _tr(context, 'No se pudo agregar la categoría.', 'Could not add category.'))),
         );
       }
     } finally {
@@ -1610,7 +1610,7 @@ class _CategoryManagerDialogState
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error is AppException ? error.message : 'No se pudo eliminar la categoría.')),
+          SnackBar(content: Text(error is AppException ? error.message : _tr(context, 'No se pudo eliminar la categoría.', 'Could not delete category.'))),
         );
       }
     } finally {
