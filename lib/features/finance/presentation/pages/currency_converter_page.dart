@@ -123,15 +123,15 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
       final uri = Uri.https('open.er-api.com', '/v6/latest/$_from');
       final response = await http.get(uri).timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) {
-        throw Exception('El servicio respondió con código ${response.statusCode}.');
+        throw Exception(_tr(context, 'El servicio respondió con código ${response.statusCode}.', 'The service returned status code ${response.statusCode}.'));
       }
       final decoded = jsonDecode(response.body);
       if (decoded is! Map<String, dynamic> || decoded['result'] != 'success') {
-        throw Exception('El proveedor no devolvió tasas válidas.');
+        throw Exception(_tr(context, 'El proveedor no devolvió tasas válidas.', 'The provider did not return valid exchange rates.'));
       }
       final rates = decoded['rates'];
       if (rates is! Map<String, dynamic>) {
-        throw Exception('No se encontraron tasas de conversión.');
+        throw Exception(_tr(context, 'No se encontraron tasas de conversión.', 'No conversion rates were found.'));
       }
       if (!mounted) return;
       setState(() {
@@ -343,7 +343,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Moneda de visualización',
+                          _tr(context, 'Moneda de visualización', 'Display currency'),
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
                           ),
@@ -353,7 +353,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Convierte automáticamente los importes de cuentas, movimientos y estadísticas. Los valores originales guardados no se modifican.',
+                    _tr(context, 'Convierte automáticamente los importes de cuentas, movimientos y estadísticas. Los valores originales guardados no se modifican.', 'Automatically converts amounts in accounts, transactions, and statistics. Original saved values are not changed.'),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -405,7 +405,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'La conversión es una estimación. Las comisiones bancarias y el tipo aplicado por tu entidad pueden ser distintos.',
+            _tr(context, 'La conversión es una estimación. Las comisiones bancarias y el tipo aplicado por tu entidad pueden ser distintos.', 'The conversion is an estimate. Bank fees and the rate applied by your provider may differ.'),
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ],
