@@ -7,6 +7,9 @@ import '../../../../core/utils/currency_utils.dart';
 import '../../../auth/presentation/session_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 class FinancePlanningPage extends ConsumerStatefulWidget {
   const FinancePlanningPage({super.key});
 
@@ -131,11 +134,11 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
+              child: Text(_tr(context, 'Cancelar', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, controller.text),
-              child: const Text('Guardar'),
+              child: Text(_tr(context, 'Guardar', 'Save')),
             ),
           ],
         ),
@@ -161,7 +164,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
+              child: Text(_tr(context, 'Cancelar', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
@@ -178,7 +181,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
   Future<void> _setBudget() async {
     if (_saving) return;
     final raw = await _promptAmount(
-      title: 'Presupuesto mensual',
+      title: _tr(context, 'Presupuesto mensual', 'Monthly budget'),
       label: 'Límite para $_periodLabel',
       initial: _budget == null
           ? ''
@@ -213,9 +216,9 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
 
   Future<void> _addGoal() async {
     if (_saving) return;
-    final title = await _promptText(title: 'Nueva meta de ahorro', label: 'Nombre de la meta');
+    final title = await _promptText(title: _tr(context, 'Nueva meta de ahorro', 'New savings goal'), label: _tr(context, 'Nombre de la meta', 'Goal name'));
     if (title == null || title.trim().isEmpty || !mounted) return;
-    final raw = await _promptAmount(title: 'Objetivo de ahorro', label: 'Monto objetivo');
+    final raw = await _promptAmount(title: _tr(context, 'Objetivo de ahorro', 'Savings goal'), label: _tr(context, 'Monto objetivo', 'Target amount'));
     if (raw == null || !mounted) return;
     try {
       final target = _minorUnits(raw);
@@ -244,7 +247,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
   Future<void> _addContribution(Map<String, Object?> goal) async {
     if (_saving) return;
     final raw = await _promptAmount(
-      title: 'Añadir ahorro',
+      title: _tr(context, 'Añadir ahorro', 'Add savings'),
       label: 'Cantidad para “${goal['title']}”',
     );
     if (raw == null || !mounted) return;
@@ -285,10 +288,10 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
     final ratio = limit == null || limit <= 0 ? 0.0 : (_spentThisMonth / limit).clamp(0.0, 1.0).toDouble();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Presupuestos y metas'),
+        title: Text(_tr(context, 'Presupuestos y metas', 'Budgets and goals')),
         actions: [
           IconButton(
-            tooltip: 'Actualizar',
+            tooltip: _tr(context, 'Actualizar', 'Refresh'),
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -318,7 +321,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
                               const Icon(Icons.account_balance_wallet_outlined),
                               const SizedBox(width: 10),
                               Expanded(child: Text('Presupuesto de $_periodLabel', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
-                              IconButton(onPressed: _saving ? null : _setBudget, tooltip: 'Configurar presupuesto', icon: const Icon(Icons.edit_outlined)),
+                              IconButton(onPressed: _saving ? null : _setBudget, tooltip: _tr(context, 'Configurar presupuesto', 'Set budget'), icon: const Icon(Icons.edit_outlined)),
                             ]),
                             const SizedBox(height: 12),
                             Text('Gastado este mes: ${money(_spentThisMonth)}', style: theme.textTheme.bodyLarge),
@@ -378,7 +381,7 @@ class _FinancePlanningPageState extends ConsumerState<FinancePlanningPage> {
             const Icon(Icons.savings_outlined),
             const SizedBox(width: 10),
             Expanded(child: Text(goal['title'] as String, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
-            IconButton(tooltip: 'Añadir ahorro', onPressed: _saving ? null : () => _addContribution(goal), icon: const Icon(Icons.add_circle_outline_rounded)),
+            IconButton(tooltip: _tr(context, 'Añadir ahorro', 'Add savings'), onPressed: _saving ? null : () => _addContribution(goal), icon: const Icon(Icons.add_circle_outline_rounded)),
           ]),
           const SizedBox(height: 6),
           Text('${money(saved)} de ${money(target)}'),
