@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../../../core/settings/app_preferences.dart';
 import '../../../../core/utils/currency_utils.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 /// Conversor informativo. Nunca modifica saldos ni transacciones guardados.
 class CurrencyConverterPage extends StatefulWidget {
   const CurrencyConverterPage({super.key});
@@ -38,7 +41,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     'VES': 'Bolívar venezolano',
   };
 
-  final _amountController = TextEditingController(text: '1');
+  static const _englishCurrencies = <String, String>{'DOP':'Dominican peso','USD':'US dollar','EUR':'Euro','GBP':'British pound','CAD':'Canadian dollar','MXN':'Mexican peso','COP':'Colombian peso','ARS':'Argentine peso','BRL':'Brazilian real','JPY':'Japanese yen','CHF':'Swiss franc','CNY':'Chinese yuan','PEN':'Peruvian sol','CLP':'Chilean peso','CRC':'Costa Rican colón','GTQ':'Guatemalan quetzal','HNL':'Honduran lempira','JMD':'Jamaican dollar','TTD':'Trinidad and Tobago dollar','VES':'Venezuelan bolívar'};\n\n  String _currencyName(String code) => Localizations.localeOf(context).languageCode == 'en' ? (_englishCurrencies[code] ?? code) : (_currencies[code] ?? code);\n\n  final _amountController = TextEditingController(text: '1');
   String _from = 'DOP';
   String _to = 'USD';
   Map<String, dynamic> _rates = {};
@@ -89,7 +92,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.'),
+            content: Text(_tr(context, 'No hay tasas de cambio disponibles. Conéctate a Internet e inténtalo de nuevo.', 'No exchange rates are available. Connect to the internet and try again.')),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -101,7 +104,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     setState(() => _displayCurrency = code);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Moneda de visualización cambiada a ${currencyLabel(code)}'),
+        content: Text(_tr(context, 'Moneda de visualización cambiada a ${currencyLabel(code)}', 'Display currency changed to ${code}')),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -140,7 +143,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     } catch (_) {
       if (mounted) {
         setState(() {
-          _error = 'No se pudieron actualizar las tasas. Comprueba tu conexión e inténtalo de nuevo.';
+          _error = _tr(context, 'No se pudieron actualizar las tasas. Comprueba tu conexión e inténtalo de nuevo.', 'Could not update rates. Check your connection and try again.');
         });
       }
     } finally {
@@ -169,7 +172,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
             for (final entry in _currencies.entries)
               ListTile(
                 title: Text(entry.key),
-                subtitle: Text(entry.value),
+                subtitle: Text(_currencyName(entry.key)),
                 trailing: entry.key == selected ? const Icon(Icons.check_circle_rounded) : null,
                 onTap: () => Navigator.pop(context, entry.key),
               ),
@@ -206,10 +209,10 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     final scheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conversor de monedas'),
+        title: Text(_tr(context, 'Conversor de monedas', 'Currency converter')),
         actions: [
           IconButton(
-            tooltip: 'Actualizar tasas',
+            tooltip: _tr(context, 'Actualizar tasas', 'Refresh rates'),
             onPressed: _loading ? null : _loadRates,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -233,7 +236,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      labelText: 'Cantidad',
+                      labelText: _tr(context, 'Cantidad', 'Amount'),
                       prefixIcon: const Icon(Icons.payments_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -247,7 +250,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('De'),
+                              Text(_tr(context, 'De', 'From')),
                               const SizedBox(height: 4),
                               Text(_from, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                               Text(_currencies[_from] ?? _from, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
@@ -266,7 +269,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('A'),
+                              Text(_tr(context, 'A', 'To')),
                               const SizedBox(height: 4),
                               Text(_to, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                               Text(_currencies[_to] ?? _to, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.left),
