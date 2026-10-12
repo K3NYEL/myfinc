@@ -13,6 +13,9 @@ import '../../../../shared/widgets/myfinc_skeleton.dart';
 import '../../../auth/presentation/session_provider.dart';
 import '../providers.dart';
 
+String _tr(BuildContext context, String spanish, String english) =>
+    Localizations.localeOf(context).languageCode == 'en' ? english : spanish;
+
 TextStyle _muted(BuildContext context) => TextStyle(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
@@ -79,13 +82,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           fontWeight: FontWeight.w800,
                         )),
                         const SizedBox(height: 3),
-                        Text('${all.length} movimientos cargados',
+                        Text(_tr(context, '${all.length} movimientos cargados', '${all.length} transactions loaded'),
                           style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Conversor de monedas',
+                    tooltip: _tr(context, 'Conversor de monedas', 'Currency converter'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const CurrencyConverterPage(),
@@ -94,7 +97,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     icon: const Icon(Icons.currency_exchange_rounded),
                   ),
                   IconButton(
-                    tooltip: 'Actualizar movimientos',
+                    tooltip: _tr(context, 'Actualizar movimientos', 'Refresh transactions'),
                     onPressed: () => ref.invalidate(movementsProvider),
                     icon: const Icon(Icons.refresh_rounded),
                   ),
@@ -106,10 +109,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 onChanged: (value) => setState(() => _query = value),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Buscar por concepto o detalle',
+                  hintText: _tr(context, 'Buscar por concepto o detalle', 'Search by description or details'),
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: _query.isEmpty ? null : IconButton(
-                    tooltip: 'Limpiar búsqueda',
+                    tooltip: _tr(context, 'Limpiar búsqueda', 'Clear search'),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _query = '');
@@ -128,7 +131,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 children: [
                   Expanded(
                     child: _MovementSummaryCard(
-                      label: 'Ingresos recientes',
+                      label: _tr(context, 'Ingresos recientes', 'Recent income'),
                       amount: income,
                       icon: Icons.south_west_rounded,
                       color: const Color(0xFF16A34A),
@@ -137,7 +140,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _MovementSummaryCard(
-                      label: 'Gastos recientes',
+                      label: _tr(context, 'Gastos recientes', 'Recent expenses'),
                       amount: expenses,
                       icon: Icons.north_east_rounded,
                       color: scheme.error,
@@ -375,7 +378,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
               children: [
                 TextField(
                   controller: name,
-                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  decoration: const InputDecoration(labelText: _tr(context, 'Nombre', 'Name')),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
@@ -397,7 +400,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration:
-                      const InputDecoration(labelText: 'Balance inicial'),
+                      const InputDecoration(labelText: _tr(context, 'Balance inicial', 'Opening balance')),
                 ),
               ],
             ),
@@ -467,7 +470,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
           children: [
             Text('Mis cuentas', style: Theme.of(context).textTheme.titleLarge),
             IconButton(
-              tooltip: 'Crear cuenta',
+              tooltip: _tr(context, 'Crear cuenta', 'Create account'),
               onPressed: () => _new(context, ref),
               icon: const Icon(Icons.add),
             ),
@@ -550,14 +553,14 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                               _profileDetail(
                                 dialogContext,
                                 icon: Icons.event_outlined,
-                                label: 'Cuenta creada',
+                                label: _tr(context, 'Cuenta creada', 'Account created'),
                                 value: formatDateTime(user?.createdAt),
                               ),
                               const SizedBox(height: 8),
                               _profileDetail(
                                 dialogContext,
                                 icon: Icons.login_rounded,
-                                label: 'Último acceso',
+                                label: _tr(context, 'Último acceso', 'Last sign-in'),
                                 value: formatDateTime(user?.lastLogin),
                               ),
                             ],
@@ -718,7 +721,7 @@ class StatisticsPage extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Actualizar estadísticas',
+                tooltip: _tr(context, 'Actualizar estadísticas', 'Refresh statistics'),
                 onPressed: () {
                   ref.invalidate(summaryProvider);
                   ref.invalidate(byCategoryProvider);
@@ -785,7 +788,7 @@ class StatisticsPage extends ConsumerWidget {
             children: [
               Expanded(
                 child: _StatisticsMetricCard(
-                  label: 'Ingresos',
+                  label: _tr(context, 'Ingresos', 'Income'),
                   value: income,
                   icon: Icons.trending_up_rounded,
                   color: const Color(0xFF16A34A),
@@ -794,7 +797,7 @@ class StatisticsPage extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatisticsMetricCard(
-                  label: 'Gastos',
+                  label: _tr(context, 'Gastos', 'Expenses'),
                   value: expenses,
                   icon: Icons.trending_down_rounded,
                   color: scheme.error,
@@ -837,11 +840,11 @@ class StatisticsPage extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _LegendItem(color: const Color(0xFF16A34A), label: 'Ingresos', value: money(income)),
+                        child: _LegendItem(color: const Color(0xFF16A34A), label: _tr(context, 'Ingresos', 'Income'), value: money(income)),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _LegendItem(color: scheme.error, label: 'Gastos', value: money(expenses)),
+                        child: _LegendItem(color: scheme.error, label: _tr(context, 'Gastos', 'Expenses'), value: money(expenses)),
                       ),
                     ],
                   ),
@@ -858,7 +861,7 @@ class StatisticsPage extends ConsumerWidget {
                 )),
               ),
               if (categoryTotals.isNotEmpty)
-                Text('${categoryTotals.length} categorías',
+                Text(_tr(context, '${categoryTotals.length} categorías', '${categoryTotals.length} categories'),
                   style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
             ],
           ),
