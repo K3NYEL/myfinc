@@ -66,10 +66,60 @@ class _MyFincAppState extends ConsumerState<MyFincApp>
           data: mediaQuery.copyWith(
             disableAnimations: !settings.animationsEnabled,
           ),
-          child: child ?? const SizedBox.shrink(),
+          child: LanguageTransition(
+            languageCode: settings.languageCode,
+            enabled: settings.animationsEnabled,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
       debugShowCheckedModeBanner: false,
     );
   }
+}
+
+/// Briefly dims the existing route tree when the app language changes.
+/// It deliberately keeps the same child mounted to avoid duplicating GoRouter keys.
+class LanguageTransition extends StatefulWidget {
+  const LanguageTransition({
+    super.key,
+    required this.languageCode,
+    required this.enabled,
+    required this.child,
+  });
+
+  final String languageCode;
+  final bool enabled;
+  final Widget child;
+
+  @override
+  State<LanguageTransition> createState() => _LanguageTransitionState();
+}
+
+class _LanguageTransitionState extends State<LanguageTransition> {
+  double _opacity = 1;
+
+  @override
+  void didUpdateWidget(covariant LanguageTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.languageCode == widget.languageCode ||
+        !widget.enabled ||
+        MediaQuery.disableAnimationsOf(context)) {
+      _opacity = 1;
+      return;
+    }
+
+    _opacity = 0.62;
+    Future<void>.delayed(const Duration(milliseconds: 90), () {
+      if (mounted) setState(() => _opacity = 1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedOpacity(
+        opacity: _opacity,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        child: widget.child,
+      );
 }
