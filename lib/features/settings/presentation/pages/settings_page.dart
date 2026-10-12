@@ -91,7 +91,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       builder: (dialogContext) => SimpleDialog(
         title: Text(_tr(context, 'Copia automática', 'Automatic backup')),
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
             child: Text(
               'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.',
@@ -193,7 +193,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       loadingRoute = showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const _OperationLoadingDialog(
+        builder: (_) => _OperationLoadingDialog(
           title: _tr(context, 'Protegiendo tus datos', 'Protecting your data'),
           message: _tr(context, 'Creando una copia preventiva antes de eliminar…', 'Creating a safety backup before deletion…'),
         ),
@@ -208,7 +208,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       loadingRoute = showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const _OperationLoadingDialog(
+        builder: (_) => _OperationLoadingDialog(
           title: _tr(context, 'Eliminando datos financieros', 'Deleting financial data'),
           message: _tr(context, 'Eliminando únicamente los registros de esta cuenta…', 'Deleting records for this account only…'),
         ),
@@ -376,7 +376,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       loadingRoute = showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const _OperationLoadingDialog(
+        builder: (_) => _OperationLoadingDialog(
           title: _tr(context, 'Creando copia de seguridad', 'Creating backup'),
           message: _tr(context, 'Preparando tus datos y guardando el archivo localmente…', 'Preparing your data and saving the file locally…'),
         ),
@@ -573,7 +573,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       restoreLoadingRoute = showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const _OperationLoadingDialog(
+        builder: (_) => _OperationLoadingDialog(
           title: _tr(context, 'Restaurando copia de seguridad', 'Restoring backup'),
           message: _tr(context, 'Validando e importando los datos. No cierres MyFinc…', 'Validating and importing data. Do not close MyFinc…'),
         ),
@@ -925,7 +925,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       loadingRoute = showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const _OperationLoadingDialog(
+        builder: (_) => _OperationLoadingDialog(
           title: _tr(context, 'Recuperando datos antiguos', 'Recovering older data'),
           message: _tr(context, 'Comprobando relaciones y asignando registros…', 'Checking relationships and assigning records…'),
         ),
@@ -1406,7 +1406,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -1462,7 +1462,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
 
 class _OperationLoadingDialog extends StatelessWidget {
-  const _OperationLoadingDialog({
+  _OperationLoadingDialog({
     required this.title,
     required this.message,
   });
@@ -1620,18 +1620,18 @@ class _CategoryManagerDialogState
             const SizedBox(height: 12),
             Flexible(
               child: categories.when(
-                loading: () => const Center(
+                loading: () => Center(
                   child: Padding(
                     padding: EdgeInsets.all(24),
                     child: CircularProgressIndicator(),
                   ),
                 ),
-                error: (_, __) => const Padding(
+                error: (_, __) => Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(_tr(context, 'No se pudieron cargar las categorías.', 'Could not load categories.')),
                 ),
                 data: (items) => items.isEmpty
-                    ? const Padding(
+                    ? Padding(
                         padding: EdgeInsets.all(20),
                         child: Text(_tr(context, 'Todavía no hay categorías. Agrega la primera.', 'There are no categories yet. Add the first one.')),
                       )
