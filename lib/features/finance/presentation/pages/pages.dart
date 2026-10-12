@@ -386,7 +386,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                   onChanged: (value) {
                     if (value != null) set(() => type = value);
                   },
-                  items: const [
+                  items: [
                     DropdownMenuItem(value: 'cash', child: Text(_tr(context, 'Efectivo', 'Cash'))),
                     DropdownMenuItem(value: 'bank', child: Text(_tr(context, 'Banco', 'Bank'))),
                     DropdownMenuItem(value: 'savings', child: Text(_tr(context, 'Ahorros', 'Savings'))),
