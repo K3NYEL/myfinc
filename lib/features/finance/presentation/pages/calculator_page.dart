@@ -84,7 +84,7 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
   String _format(double value) {
     if (!value.isFinite) return 'Error';
     if (value == value.truncateToDouble()) return value.toInt().toString();
-    return value.toStringAsPrecision(10).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\., '');
+    return value.toStringAsPrecision(10).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
   }
 
   void _clear() {
