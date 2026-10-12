@@ -82,7 +82,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
 
       setState(() {
-        _currentVersion = 'Desconocida';
+        _currentVersion = Localizations.localeOf(context).languageCode == 'en' ? 'Unknown' : 'Desconocida';
       });
     }
   }
@@ -93,14 +93,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     setState(() => _autoBackupFrequency = frequency);
   }
 
-  String _autoBackupLabel(String frequency) {
+  String _autoBackupLabel(String frequency, String languageCode) {
+    final isEnglish = languageCode == 'en';
     switch (frequency) {
       case 'daily':
-        return 'Diaria al iniciar sesión';
+        return isEnglish ? 'Daily at sign-in' : 'Diaria al iniciar sesión';
       case 'weekly':
-        return 'Semanal al iniciar sesión';
+        return isEnglish ? 'Weekly at sign-in' : 'Semanal al iniciar sesión';
       default:
-        return 'Desactivada';
+        return isEnglish ? 'Disabled' : 'Desactivada';
     }
   }
 
@@ -113,13 +114,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Padding(
             padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
             child: Text(
-              'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.',
+              _tr(context, 'MyFinc guardará una copia local cuando inicies sesión y haya pasado el intervalo elegido. No se ejecuta en segundo plano con la app cerrada. Los archivos JSON no están cifrados y contienen datos financieros legibles; guárdalos en un lugar privado.', 'MyFinc will save a local backup at sign-in once the selected interval has passed. It does not run in the background while the app is closed. JSON files are not encrypted and contain readable financial data; keep them somewhere private.'),
             ),
           ),
           for (final option in const [
-            ('disabled', 'Desactivada'),
-            ('daily', 'Cada 24 horas al iniciar sesión'),
-            ('weekly', 'Cada 7 días al iniciar sesión'),
+            ('disabled', _tr(context, 'Desactivada', 'Disabled')),
+            ('daily', _tr(context, 'Cada 24 horas al iniciar sesión', 'Every 24 hours at sign-in')),
+            ('weekly', _tr(context, 'Cada 7 días al iniciar sesión', 'Every 7 days at sign-in')),
           ])
             SimpleDialogOption(
               onPressed: () => Navigator.pop(dialogContext, option.$1),
@@ -1212,7 +1213,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _SettingsTile(
               icon: Icons.backup_table_outlined,
               title: _tr(context, 'Copia automática', 'Automatic backup'),
-              subtitle: _autoBackupLabel(_autoBackupFrequency),
+              subtitle: _autoBackupLabel(_autoBackupFrequency, settings.languageCode),
               onTap: _dataOperationInProgress ? null : _configureAutoBackup,
             ),
             _SettingsTile(
@@ -1285,7 +1286,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.info_outline,
               title: settings.languageCode == 'en' ? 'Current version' : 'Versión actual',
               subtitle:
-                  _currentVersion == null ? 'Cargando...' : 'v$_currentVersion',
+                  _currentVersion == null ? _tr(context, 'Cargando...', 'Loading...') : 'v$_currentVersion',
             ),
           ],
         ),
