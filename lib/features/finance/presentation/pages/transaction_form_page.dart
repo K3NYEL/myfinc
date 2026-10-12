@@ -124,7 +124,7 @@ class _State extends ConsumerState<TransactionFormPage> {
     final selectedCategoryId = _cat ?? (categories.isNotEmpty ? categories.first.id : null);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_title)),
+      appBar: AppBar(title: Text(_title(isEnglish))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
