@@ -41,7 +41,11 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     'VES': 'Bolívar venezolano',
   };
 
-  static const _englishCurrencies = <String, String>{'DOP':'Dominican peso','USD':'US dollar','EUR':'Euro','GBP':'British pound','CAD':'Canadian dollar','MXN':'Mexican peso','COP':'Colombian peso','ARS':'Argentine peso','BRL':'Brazilian real','JPY':'Japanese yen','CHF':'Swiss franc','CNY':'Chinese yuan','PEN':'Peruvian sol','CLP':'Chilean peso','CRC':'Costa Rican colón','GTQ':'Guatemalan quetzal','HNL':'Honduran lempira','JMD':'Jamaican dollar','TTD':'Trinidad and Tobago dollar','VES':'Venezuelan bolívar'};\n\n  String _currencyName(String code) => Localizations.localeOf(context).languageCode == 'en' ? (_englishCurrencies[code] ?? code) : (_currencies[code] ?? code);\n\n  final _amountController = TextEditingController(text: '1');
+  static const _englishCurrencies = <String, String>{'DOP':'Dominican peso','USD':'US dollar','EUR':'Euro','GBP':'British pound','CAD':'Canadian dollar','MXN':'Mexican peso','COP':'Colombian peso','ARS':'Argentine peso','BRL':'Brazilian real','JPY':'Japanese yen','CHF':'Swiss franc','CNY':'Chinese yuan','PEN':'Peruvian sol','CLP':'Chilean peso','CRC':'Costa Rican colón','GTQ':'Guatemalan quetzal','HNL':'Honduran lempira','JMD':'Jamaican dollar','TTD':'Trinidad and Tobago dollar','VES':'Venezuelan bolívar'};
+
+  String _currencyName(String code) => Localizations.localeOf(context).languageCode == 'en' ? (_englishCurrencies[code] ?? code) : (_currencies[code] ?? code);
+
+  final _amountController = TextEditingController(text: '1');
   String _from = 'DOP';
   String _to = 'USD';
   Map<String, dynamic> _rates = {};
