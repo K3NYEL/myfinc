@@ -1257,14 +1257,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 if (!mounted) return;
                 if (!granted) {
                   await NotificationPermissionService.openSettings();
-                  if (!mounted) return;
-                } else {
-                  await _showUpdateMessage(
+                  return;
+                }
+                if (!mounted) return;
+                await _showUpdateMessage(
                     title: _tr(context, 'Notificaciones permitidas', 'Notifications allowed'),
                     message: _tr(context, 'El permiso del dispositivo está activo. Los avisos de versión se consultan dentro del centro de notificaciones de MyFinc.', 'Device notification permission is enabled. Version announcements are available in the MyFinc notification center.'),
                     icon: Icons.check_circle_outline_rounded,
-                  );
-                }
+                );
               },
             ),
             _SettingsTile(
