@@ -170,8 +170,8 @@ class _ProfileCustomizationPageState
               decoration: InputDecoration(
                 labelText: isEnglish ? 'Display name' : 'Nombre visible',
                 hintText: isEnglish ? 'What should we call you?' : '¿Cómo quieres que te llamen?',
-                prefixIcon: Icon(Icons.badge_outlined),
-                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.badge_outlined),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8),
@@ -185,8 +185,8 @@ class _ProfileCustomizationPageState
               decoration: InputDecoration(
                 labelText: isEnglish ? 'Bio (optional)' : 'Descripción (opcional)',
                 hintText: isEnglish ? 'A short sentence about you' : 'Una frase sobre ti',
-                prefixIcon: Icon(Icons.short_text_rounded),
-                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.short_text_rounded),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
