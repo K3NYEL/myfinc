@@ -61,6 +61,7 @@ class _State extends ConsumerState<TransactionFormPage> {
       error = e.message;
     } catch (e) {
       debugPrint('Error al guardar: $e');
+      if (!mounted) return;
       error = _tr(context, 'No pudimos guardar el movimiento. Inténtalo nuevamente.', 'We could not save the transaction. Please try again.');
     }
     if (!mounted) return;
