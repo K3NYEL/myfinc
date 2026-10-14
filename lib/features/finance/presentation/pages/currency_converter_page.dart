@@ -108,7 +108,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     setState(() => _displayCurrency = code);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_tr(context, 'Moneda de visualización cambiada a ${currencyLabel(code)}', 'Display currency changed to ${code}')),
+        content: Text(_tr(context, 'Moneda de visualización cambiada a ${currencyLabel(code)}', 'Display currency changed to $code')),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -170,8 +170,8 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
           shrinkWrap: true,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: Text(_tr(context, 'Seleccionar moneda', 'Select currency'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Text(_tr(context, 'Seleccionar moneda', 'Select currency'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             for (final entry in _currencies.entries)
               ListTile(
