@@ -140,8 +140,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(isEnglish ? 'Your financial overview' : 'Tu resumen financiero', style: mutedStyle),
                 ],
               ),
             ),
@@ -212,6 +210,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       : const Color(0xFF15803D),
                 ),
               ),
+              const SizedBox(width: 12),
               Expanded(
                 child: DashboardStat(
                   isEnglish ? 'Expenses' : 'Gastos',
@@ -271,7 +270,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               : Column(
                   children: [
                     for (final movement in movements.take(5))
-                      MovementTile(movement),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: MovementTile(movement),
+                      ),
                   ],
                 ),
         ),
