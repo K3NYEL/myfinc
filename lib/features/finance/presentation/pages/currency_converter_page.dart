@@ -92,6 +92,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
     if (code == _displayCurrency) return;
     if (convertDisplayAmount(1, from: 'DOP', to: code) == null) {
       final refreshed = await refreshDisplayExchangeRates();
+      if (!mounted) return;
       if (!refreshed && convertDisplayAmount(1, from: 'DOP', to: code) == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
