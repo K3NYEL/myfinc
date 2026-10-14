@@ -1552,7 +1552,7 @@ class _CategoryManagerDialogState
           decoration: InputDecoration(
             labelText: _tr(context, 'Nombre', 'Name'),
             hintText: _tr(context, 'Ej. Salario o Transporte', 'e.g. Salary or Transport'),
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.pop(dialogContext, value.trim()),
         ),
@@ -1633,8 +1633,8 @@ class _CategoryManagerDialogState
           children: [
             SegmentedButton<String>(
               segments: [
-                ButtonSegment(value: 'expense', label: Text(_tr(context, 'Gastos', 'Expenses')), icon: Icon(Icons.south_west_rounded)),
-                ButtonSegment(value: 'income', label: Text(_tr(context, 'Ingresos', 'Income')), icon: Icon(Icons.north_east_rounded)),
+                ButtonSegment(value: 'expense', label: Text(_tr(context, 'Gastos', 'Expenses')), icon: const Icon(Icons.south_west_rounded)),
+                ButtonSegment(value: 'income', label: Text(_tr(context, 'Ingresos', 'Income')), icon: const Icon(Icons.north_east_rounded)),
               ],
               selected: {_type},
               onSelectionChanged: _busy ? null : (value) => setState(() => _type = value.first),
