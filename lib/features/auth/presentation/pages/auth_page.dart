@@ -274,8 +274,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Nombres', 'First name'),
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -284,8 +284,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Apellidos', 'Last name'),
-                        prefixIcon: Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.badge_outlined),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -327,8 +327,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Nombres', 'First name'),
                         hintText: _tr(context, 'Escribe tus nombres', 'Enter your first name'),
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -338,8 +338,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       decoration: InputDecoration(
                         labelText: _tr(context, 'Apellidos', 'Last name'),
                         hintText: _tr(context, 'Escribe tus apellidos', 'Enter your last name'),
-                        prefixIcon: Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.badge_outlined),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
