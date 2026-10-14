@@ -606,7 +606,8 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                       final messenger = ScaffoldMessenger.of(context);
                       final saved = await context.push<bool>('/settings/profile');
                       await _loadProfile();
-                      if (saved == true && mounted) {
+                      if (!context.mounted) return;
+                      if (saved == true) {
                         messenger.showSnackBar(
                           SnackBar(
                             content: Text(_tr(context, 'Personalización guardada y aplicada al perfil.', 'Profile customization saved and applied.')),
